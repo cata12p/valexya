@@ -30,6 +30,13 @@ body {
   height: 95vh;
 }
 
+.logo {
+  filter: brightness(100);
+  width: 150px;
+  display: block; /* Face imaginea un element de tip block */
+  margin: 40px auto;
+}
+
 /* =============== Navigation ================ */
 .navigation {
   margin: 0 20px;
@@ -68,7 +75,7 @@ body {
 }
 
 .navigation ul li:nth-child(1) {
-  margin-bottom: 40px;
+  margin-top: 240px;
   pointer-events: none;
 }
 
@@ -137,10 +144,11 @@ body {
 
 /* ===================== Main ===================== */
 .main {
+  border-radius: 20px;;
   position: absolute;
   width: calc(100% - 300px);
   left: 300px;
-  min-height: 100vh;
+  min-height: 95vh;
   background: var(--white);
   transition: 0.5s;
 }

@@ -1,40 +1,46 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <h1 style="padding-left: 20px; font-size: 32px; color: var(--blue);">Vezi stituatia </h1>
+    <div class="details" style="display: inline-flex;">
+        <div class="cardHeader2">
+            <a href="#" class="btn">Zilnica</a>
+        </div>
+        <div class="cardHeader2">
+            <a href="#" class="btn">Saptamanala</a>
+        </div>
+        <div class="cardHeader2">
+            <a href="#" class="btn">Lunara</a>
+        </div>
+        <div class="cardHeader2">
+            <a href="#" class="btn">Anuala</a>
+        </div>
+    </div>
     <div class="cardBox">
         <div class="card">
             <div>
                 <div class="numbers">1,504</div>
-                <div class="cardName">Daily Views</div>
+                <div class="cardName">Venituri</div>
             </div>
             <div class="iconBx">
-                <ion-icon name="eye-outline"></ion-icon>
+                <ion-icon name="card-outline"></ion-icon>
             </div>
         </div>
         <div class="card">
             <div>
                 <div class="numbers">80</div>
-                <div class="cardName">Sales</div>
+                <div class="cardName">Cheltuieli</div>
             </div>
             <div class="iconBx">
-                <ion-icon name="cart-outline"></ion-icon>
+                <ion-icon name="bag-outline"></ion-icon>
             </div>
         </div>
         <div class="card">
             <div>
                 <div class="numbers">284</div>
-                <div class="cardName">Comments</div>
+                <div class="cardName">Balanta</div>
             </div>
 
-            <div class="iconBx">
-                <ion-icon name="chatbubbles-outline"></ion-icon>
-            </div>
-        </div>
-        <div class="card">
-            <div>
-                <div class="numbers">$7,842</div>
-                <div class="cardName">Earning</div>
-            </div>
             <div class="iconBx">
                 <ion-icon name="cash-outline"></ion-icon>
             </div>
@@ -44,74 +50,85 @@
     <div class="details">
         <div class="recentOrders">
             <div class="cardHeader">
-                <h2>Recent Orders</h2>
-                <a href="#" class="btn">View All</a>
+                <h2 style="font-size: 24px; padding-bottom: 20px;">Cheltuieli recente</h2>
             </div>
-            <table>
+            <table id="tablestyle">
                 <thead>
                     <tr>
-                        <td>Name</td>
-                        <td>Price</td>
-                        <td>Payment</td>
-                        <td>Status</td>
+                        <td style="width: 200px;">Furnizor</td>
+                        <td style="width: 300px;">Descriere</td>
+                        <td style="width: 100px;">Data</td>
+                        <td slot="width: 60px">Pret</td>
+                        <td style="width: 150px;">Status</td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>Star Refrigerator</td>
-                        <td>$1200</td>
-                        <td>Paid</td>
-                        <td><span class="status delivered">Delivered</span></td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>2500 Lei</td>
+                        <td><span class="status delivered">Platita</span></td>
                     </tr>
                     <tr>
                         <td>Dell Laptop</td>
-                        <td>$110</td>
-                        <td>Due</td>
-                        <td><span class="status pending">Pending</span></td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>3500 Lei</td>
+                        <td><span class="status return">Neplatita</span></td>
                     </tr>
                     <tr>
-                        <td>Apple Watch</td>
-                        <td>$1200</td>
-                        <td>Paid</td>
-                        <td><span class="status return">Return</span></td>
+                        <td>Dell Laptop</td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>3500 Lei</td>
+                        <td><span class="status return">Neplatita</span></td>
                     </tr>
                     <tr>
-                        <td>Addidas Shoes</td>
-                        <td>$620</td>
-                        <td>Due</td>
-                        <td><span class="status inProgress">In Progress</span></td>
+                        <td>Dell Laptop</td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>3500 Lei</td>
+                        <td><span class="status return">Neplatita</span></td>
                     </tr>
                     <tr>
                         <td>Star Refrigerator</td>
-                        <td>$1200</td>
-                        <td>Paid</td>
-                        <td><span class="status delivered">Delivered</span></td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>2500 Lei</td>
+                        <td><span class="status delivered">Platita</span></td>
                     </tr>
                     <tr>
-                        <td>Dell Laptop</td>
-                        <td>$110</td>
-                        <td>Due</td>
-                        <td><span class="status pending">Pending</span></td>
+                        <td>Star Refrigerator</td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>2500 Lei</td>
+                        <td><span class="status delivered">Platita</span></td>
                     </tr>
                     <tr>
-                        <td>Apple Watch</td>
-                        <td>$1200</td>
-                        <td>Paid</td>
-                        <td><span class="status return">Return</span></td>
+                        <td>Star Refrigerator</td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>2500 Lei</td>
+                        <td><span class="status delivered">Platita</span></td>
                     </tr>
                     <tr>
-                        <td>Addidas Shoes</td>
-                        <td>$620</td>
-                        <td>Due</td>
-                        <td><span class="status inProgress">In Progress</span></td>
+                        <td>Star Refrigerator</td>
+                        <td>Inlocuire placute frana, discuri, schimb ulei</td>
+                        <td>23.02.204</td>
+                        <td>2500 Lei</td>
+                        <td><span class="status delivered">Platita</span></td>
                     </tr>
                 </tbody>
             </table>
+            <div class="cardHeader">
+                <a href="#" class="btn">Vezi mai multe</a>
+            </div>
         </div>
         <!-- ================= New Customers ================ -->
         <div class="recentCustomers">
             <div class="cardHeader">
-                <h2>Recent Customers</h2>
+                <h2 style="font-size: 24px; padding-bottom: 20px;">Recent Customers</h2>
             </div>
             <table>
                 <tr>
@@ -180,7 +197,10 @@
                         <h4>Amit <br> <span>India</span></h4>
                     </td>
                 </tr>
-            </table>
+            </table style="padding-bottom: 20px;">
+            <div class="cardHeader" style="padding-top: 35px;">
+                <a href="#" class="btn">Vezi mai multe</a>
+            </div>
         </div>
     </div>
 </div>

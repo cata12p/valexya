@@ -63,6 +63,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
+  height: 90vh;
+  margin-left: 20px;
 }
 
 .navigation ul li {
@@ -80,7 +82,13 @@ body {
 
 .navigation ul li:nth-child(1) {
   margin-top: 240px;
-  pointer-events: none;
+  /* pointer-events: none; */
+}
+
+.navigation ul li:nth-child(6) {
+  position: absolute;
+  bottom: 0;
+  /* pointer-events: none; */
 }
 
 .navigation ul li a {
@@ -246,12 +254,31 @@ body {
 }
 .cardHeader .btn {
   position: relative;
-  padding: 5px 10px;
+  padding: 8px 12px;
   background: var(--blue);
   text-decoration: none;
   color: var(--white);
   border-radius: 6px;
 }
+
+.details .cardHeader2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.cardHeader2 h2 {
+  font-weight: 600;
+  color: var(--blue);
+}
+.cardHeader2 .btn {
+  position: relative;
+  padding: 15px 20px;
+  background: var(--blue);
+  text-decoration: none;
+  color: var(--white);
+  border-radius: 6px;
+}
+
 
 .details table {
   width: 100%;
@@ -285,12 +312,12 @@ body {
   text-align: center;
 }
 .status.delivered {
-  padding: 2px 4px;
-  background: #8de02c;
+  padding: 6px 26px;
+  background: #30dd69;
   color: var(--white);
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 400;
 }
 .status.pending {
   padding: 2px 4px;
@@ -298,15 +325,15 @@ body {
   color: var(--white);
   border-radius: 4px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 .status.return {
-  padding: 2px 4px;
-  background: #f00;
+  padding: 6px 16px;
+  background: rgba(255, 0, 0, 0.713);
   color: var(--white);
   border-radius: 4px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
 .status.inProgress {
   padding: 2px 4px;
@@ -319,7 +346,7 @@ body {
 
 .recentCustomers {
   position: relative;
-  display: grid;
+  /* display: grid; */
   min-height: 500px;
   padding: 20px;
   background: var(--white);
@@ -422,4 +449,8 @@ body {
     right: 0;
     left: initial;
   }
+}
+
+#tablestyle tr, #tablestyle td {
+  text-align: start;
 }

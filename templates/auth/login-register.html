@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content_auth %}
+  <div class="row bg-light vh-100">
+    <div class="col-6 d-none d-lg-block position-relative">
+      <div class="login-img"></div>
+    </div>
+    <div class="col-sm-10 col-md-6 px-sm-0 align-self-center mx-auto py-5">
+      <div class="row justify-content-center g-0">
+        <div class="col-lg-9 col-xl-8 col-xxl-6">
+          <div class="card" style="border-radius: 0 0 10px 10px;">
+            <div class="card-header text-center p-3 login-card">
+              <a class="text-decoration-none text-white fw-semibold fs-4" href="{% url 'home' %}">
+                Logare
+              </a>
+            </div>
+            <div class="card-body p-4">
+              {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  {{ error }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endif %}
+              {% if message %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endif %}
+              <div class="row d-flex justify-content-between mb-3">
+                <div class="col-auto">
+                  <h3>Logare</h3>
+                </div>
+                <div class="col-auto text-600">
+                  <span class="mb-0 fw-semi-bold">Utilizator {% if register %}existent{% else %}nou{% endif %}?</span>
+                  <span>
+                    {% if register %}
+                      <a href="{% url 'login' %}">Logheaza-te</a>
+                    {% else %}
+                      <a href="{% url 'register' %}">Inregistreaza-te</a>
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+              <form action="{% if register %}{% url 'register' %}{% else %}{% url 'login' %}{% endif %}" method="POST">
+                {% if register %}
+                  <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingNume" name="nume" placeholder="" required>
+                    <label for="floatingNume">Nume</label>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingPrenume" name="prenume" placeholder="" required>
+                    <label for="floatingPrenume">Prenume</label>
+                  </div>
+                {% endif %}
+                <div class="form-floating mb-3">
+                  <input type="email" class="form-control" id="floatingEmail" name="email" placeholder="" required>
+                  <label for="floatingEmail">Email</label>
+                </div>
+                <div class="form-floating mb-3">
+                  <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="" required>
+                  <label for="floatingPassword">Parola</label>
+                </div>
+                {% if register %}
+                  <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="confirmFloatingPassword" name="confirm_password" placeholder="" required>
+                    <label for="confirmFloatingPassword">Confirma parola</label>
+                  </div>
+                {% endif %}
+                <div class="col-auto text-end">
+                  <a href="../../../pages/authentication/split/forgot-password.html">Ai uitat parola?</a>
+                </div>
+                <div class="mb-3">
+                  <button class="btn btn-lg d-block w-100 mt-3 text-white" type="submit" name="submit" style="background-color: var(--blue);">
+                    {% if register %}Inregistreaza-te{% else %}Logheaza-te{% endif %}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content_auth %}

@@ -7,3 +7,10 @@ def static_files(request):
         'js': settings.STATIC_URL + 'assets/js/'
     }
     return context
+
+def template_shortuts(request):
+    context = {
+        'user': request.user,
+        'page': request.resolver_match.url_name
+    }
+    return context

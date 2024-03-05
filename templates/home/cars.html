@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row " style="padding: 0 20px;">
+        {% for car in cars %}
+        <div class="card" style="width: 18rem;">
+            <img src="/static/assets/imgs/scania.jpeg" class="card-img-top" alt="scania">
+            <div class="card-body">
+              <p class="card-text">{{ car.plate_number }}</p>
+              {% for driver in car.drivers.all %}
+                <p class="card-text">{{ driver.full_name }}</p>
+            {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock content %}

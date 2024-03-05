@@ -16,7 +16,9 @@
   --black2: #999;
   /* Total with margins = 300px */
   /* --main-navigation-width: 260px; */
-  --main-navigation-width: 20vw;
+  /* --main-navigation-width: 20vw; */
+  --main-navigation-width: 15vw;
+  /* --main-navigation-width: 250px; */
   --main-navigation-margins-xy: 25px;
   --total-main-navigation-width: calc(var(--main-navigation-width) + var(--main-navigation-margins-xy) * 2);
   --main-width: calc(100vw - var(--total-main-navigation-width));
@@ -71,7 +73,8 @@ body {
 }
 
 .navigation ul li {
-  padding-left: 20px;
+  /* adaugat optional, 20 inainte */
+  /* padding-left: 40px; */
   position: relative;
   width: 100%;
   list-style: none;
@@ -89,6 +92,11 @@ body {
   /* pointer-events: none; */
 }
 
+/* Added optional */
+/* .navigation ul li:nth-child(6) {
+  padding-left: 20px;
+} */
+
 /* .navigation ul li:nth-child(6) {
   position: absolute;
   bottom: 0; */
@@ -97,7 +105,7 @@ body {
 
 .navigation ul li a {
   position: relative;
-  display: block;
+  /* display: block; */
   width: 100%;
   display: flex;
   text-decoration: none;

@@ -1,19 +1,37 @@
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, resolve
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login, logout
 from django.apps import apps
+from django.http import JsonResponse
+
+
+
+# def get_page_name(request):
+#     resolver_match = resolve(request.path)
+#     return resolver_match.url_name
+# new_page = get_page_name(request)
 
 
 # Create your views here.
-class Home(APIView):
+class Router(APIView):
     def get(self, request):
+        page = request.session.get('page')
+        print(page)
+
         if not request.user.is_authenticated:
             request.resolver_match.url_name = 'login'
             return render(request, "auth/login-register.html", None)
         
         else:
-            return render(request, "index.html", None)
+            if page == 'cars':
+                cars_view = Cars()
+                context = cars_view.get_cars_data(request)
+                return render(request, "home/cars.html", context)
+
+            elif page == 'raports':
+                request.session['page'] = 'raports'
+                return render(request, "home/index.html", None)
 
 
 class Login(APIView):
@@ -22,7 +40,7 @@ class Login(APIView):
             return render(request, "auth/login-register.html", None)
         
         else:
-            return redirect(reverse('home'))
+            return redirect(reverse('raports'))
     
     def post(self, request):
         username = request.data.get('email')
@@ -37,7 +55,7 @@ class Login(APIView):
 
         else:
             login(request, user)
-            return redirect(reverse('home'))
+            return redirect(reverse('raports'))
 
 
 class Logout(APIView):
@@ -60,7 +78,7 @@ class CreateAccount(APIView):
             return render(request, "auth/login-register.html", context)
         
         else:
-            return redirect(reverse('home'))
+            return redirect(reverse('raports'))
         
     def post(self, request):
         username = request.data.get('email')
@@ -81,7 +99,6 @@ class CreateAccount(APIView):
             )
 
         else:
-
             if apps.get_model('home.User').objects.filter(email=username).exists():
                 context = dict (
                     error = "Exista deja un cont inregistrat \
@@ -100,3 +117,31 @@ class CreateAccount(APIView):
 
             request.resolver_match.url_name = 'login'
             return render(request, "auth/login-register.html", context)
+
+
+class Raports(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            request.resolver_match.url_name = 'login'
+            return render(request, "auth/login-register.html", None)
+        
+        else:
+            request.session['page'] = 'raports'
+            return render(request, "home/index.html", None)
+
+
+class Cars(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            request.resolver_match.url_name = 'login'
+            return render(request, "auth/login-register.html", None)
+        
+        else:
+            context = self.get_cars_data(request)
+            return render(request, "home/cars.html", context)
+        
+    def get_cars_data(self, request):
+        request.session['page'] = 'cars'
+        cars_data = apps.get_model('home.Car').objects.all()
+        context = dict(cars = cars_data)
+        return context

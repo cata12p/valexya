@@ -30,8 +30,9 @@ class Router(APIView):
                 return render(request, "home/cars.html", context)
 
             elif page == 'raports':
-                request.session['page'] = 'raports'
-                return render(request, "home/index.html", None)
+                raports_view = Raports()
+                context = raports_view.get_incomings_data(request)
+                return render(request, "home/raports.html", context)
 
 
 class Login(APIView):
@@ -126,8 +127,19 @@ class Raports(APIView):
             return render(request, "auth/login-register.html", None)
         
         else:
-            request.session['page'] = 'raports'
-            return render(request, "home/index.html", None)
+            context = self.get_incomings_data(request)
+            return render(request, "home/raports.html", context)
+
+    def get_incomings_data(self, request):
+        request.session['page'] = 'raports'
+        # data_incoming_invoices = apps.get_model('home.InvoiceCar').objects.filter(invoice__category='INCOMING')
+        incomings_data = apps.get_model('home.Invoice').objects.filter(category='INCOMING')
+        outcomings_data = apps.get_model('home.Invoice').objects.filter(category='OUTCOMING')
+        context = dict (
+            incomings = incomings_data,
+            outcomings = outcomings_data
+        )
+        return context
 
 
 class Cars(APIView):

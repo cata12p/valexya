@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}
+    VALEXYA ICHIM S.R.L. - Rapoarte
+{% endblock %}
+
+{% block content %}
+    <style>
+        .filterable {
+            margin-top: 15px;
+        }
+        .filterable .panel-heading .pull-right {
+            margin-top: -20px;
+        }
+        .filterable .filters input[disabled] {
+            background-color: transparent;
+            border: none;
+            cursor: auto;
+            box-shadow: none;
+            padding: 0;
+            height: auto;
+        }
+        .filterable .filters input[disabled]::-webkit-input-placeholder {
+            color: #333;
+        }
+        .filterable .filters input[disabled]::-moz-placeholder {
+            color: #333;
+        }
+        .filterable .filters input[disabled]:-ms-input-placeholder {
+            color: #333;
+        }
+
+        .table.dataTable.no-footer {
+            border: none;
+        }
+        .table.dataTable tr th,
+        .table.dataTable tbody tr td {
+            border-bottom: 1px solid #dee2e6;
+        }
+        table.dataTable thead .sorting {
+            /* background-image: none !important; */
+            background-image: url('https://cdn.datatables.net/1.11.5/images/sort_both.png') !important;
+        }
+        table.dataTable thead .sorting_asc {
+            background-image: url('https://cdn.datatables.net/1.11.5/images/sort_both.png') !important;
+            /* background-image: none !important; */
+        }
+        table.dataTable thead .sorting_desc {
+            background-image: url('https://cdn.datatables.net/1.11.5/images/sort_both.png') !important;
+            /* background-image: none !important; */
+        }
+    </style>
+    <div class="row">
+        <div class="col-md-12 d-flex align-items-center">
+            <h2 class="m-0 me-4" style="font-size: 24px; color: var(--blue);">Vezi situația</h2>
+            <a href="#" class="btn btn-outline-primary border-valexya color-valexya me-2">Zilnică</a>
+            <a href="#" class="btn btn-outline-primary border-valexya color-valexya me-2">Săptămânală</a>
+            <a href="#" class="btn btn-outline-primary border-valexya color-valexya me-2">Lunară</a>
+            <a href="#" class="btn btn-outline-primary border-valexya color-valexya">Anuală</a>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-sm-6 col-md-3 d-flex">
+            <div class="card card-stats mb-4 mb-xl-0 shadow flex-fill">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Venituri</h5>
+                            <span class="h2 fw-semibold mb-0">350,897</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                                <i class="fas fa-money-bill"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-0 text-muted text-sm">
+                        <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 3.48%</span>
+                        <span class="text-nowrap">Fata de luna trecuta</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3 d-flex">
+            <div class="card card-stats mb-4 mb-xl-0 shadow flex-fill">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Cheltuieli</h5>
+                            <span class="h2 fw-semibold mb-0">2,356</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-0 text-muted text-sm">
+                        <span class="text-danger mr-2"><i class="fas fa-arrow-down"></i> 3.48%</span>
+                        <span class="text-nowrap">Fata de luna trecuta</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3 d-flex">
+            <div class="card card-stats mb-4 mb-xl-0 shadow flex-fill">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Balanta</h5>
+                            <span class="h2 fw-semibold mb-0">924</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                                <!-- <i class="fas fa-chart-pie"></i> -->
+                                <i class="fas fa-landmark"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-0 text-muted text-sm">
+                        <span class="text-warning mr-2"><i class="fas fa-arrow-down"></i> 1.10%</span>
+                        <span class="text-nowrap">Fata de luna trecuta</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3 d-flex">
+            <div class="card card-stats mb-4 mb-xl-0 shadow flex-fill">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Profitabilitate</h5>
+                            <span class="h2 fw-semibold mb-0">49,65%</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-info text-white rounded-circle shadow">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-0 text-muted text-sm">
+                        <span class="text-success mr-2"><i class="fas fa-arrow-up"></i> 12%</span>
+                        <span class="text-nowrap">Fata de luna trecuta</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-8 d-flex " style="border-radius: 20px;">
+            <div class="card card-stats shadow flex-fill">
+                <div class="card-body filterable">
+                    <div class="d-flex align-items-center mb-5">
+                        <h2 class="m-0 me-auto" style="font-size: 24px; color: var(--blue);">
+                            Cheltuieli <span class="text-danger mr-2"><i class="fas fa-arrow-down"style="font-size: 24px;"></i></span>
+                        </h2>
+                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-filter"></i> Cautare</button>
+                    </div>
+                    <table class="table table-responsive" id="tabel-cheltuieli">
+                        <thead>
+                            <tr class="filters">
+                                <th><input type="text" class="form-control" placeholder="Client" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Descriere" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Data" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Suma" disabled></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for outcoming in outcomings %}
+                                <tr>
+                                    <td>{{ outcoming.client }}</td>
+                                    <td>{{ outcoming.description }}</td>
+                                    <td>{{ outcoming.emit_date|date:"d.m.Y" }}</td>
+                                    <td>{{ outcoming.value }} {{ outcoming.currency }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 d-flex">
+            <div class="card card-stats shadow flex-fill">
+                <div class="card-body filterable">
+                    <div class="d-flex align-items-center mb-5">
+                        <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
+                            Venituri <span class="text-success mr-2"><i class="fas fa-arrow-up"style="font-size: 24px;"></i></span>
+                        </h2>
+                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-filter"></i> Filtrare</button>
+                    </div>
+                    <table class="table table-responsive" id="tabel-venituri">
+                        <thead>
+                            <tr class="filters">
+                                <th><input type="text" class="form-control" placeholder="Factura" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Client" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Suma" disabled></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for incoming in incomings %}
+                                <tr>
+                                    <td>{{ incoming.series }}{{ incoming.number }}</td>
+                                    <td>{{ incoming.client }}</td>
+                                    <td>{{ incoming.value }} {{ incoming.currency }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        var table = $('#tabel-cheltuieli').DataTable({
+            "language": {
+                "search": "Căutare:",
+                "lengthMenu": "Afișare _MENU_ înregistrări pe pagină",
+                "zeroRecords": "Nu s-au găsit înregistrări",
+                "info": "Afișate de la _START_ până la _END_ din _TOTAL_ înregistrări",
+                "infoEmpty": "Afișate de la 0 până la 0 din 0 înregistrări",
+                "infoFiltered": "(filtrate dintr-un total de _MAX_ înregistrări)",
+                "paginate": {
+                    "first": "Prima",
+                    "last": "Ultima",
+                    "next": "Următoarea",
+                    "previous": "Anterioara"
+                }
+            },
+            "columnDefs": [{
+                "type": "num",
+                "targets": 3,
+                "render": function(data, type, row) {
+                    if (type === 'sort' || type === 'type') {
+                        return parseFloat(data.replace(/[^\d.-]/g, ''));
+                    }
+                    return data;
+                }
+            }],
+            searching: false,
+            paging: true,
+            info: true
+        });
+
+        $('.filterable .btn-filter').click(function(){
+            var $panel = $(this).parents('.filterable'),
+            $filters = $panel.find('.filters input'),
+            $tbody = $panel.find('.table tbody');
+            if ($filters.prop('disabled') == true) {
+                $filters.prop('disabled', false);
+                $filters.first().focus();
+            } else {
+                $filters.val('').prop('disabled', true);
+                $tbody.find('.no-result').remove();
+                $tbody.find('tr').show();
+            }
+        });
+
+        $('.filterable .filters input').keyup(function(e){
+            var code = e.keyCode || e.which;
+            if (code == '9') return;
+            var $input = $(this),
+            inputContent = $input.val().toLowerCase(),
+            $panel = $input.parents('.filterable'),
+            column = $panel.find('.filters th').index($input.parents('th')),
+            $table = $panel.find('.table'),
+            $rows = $table.find('tbody tr');
+            var $filteredRows = $rows.filter(function(){
+                var value = $(this).find('td').eq(column).text().toLowerCase();
+                return value.indexOf(inputContent) === -1;
+            });
+            $table.find('tbody .no-result').remove();
+            $rows.show();
+            $filteredRows.hide();
+            if ($filteredRows.length === $rows.length) {
+                $table.find('tbody').prepend($('<tr class="no-result text-center"><td colspan="'+ $table.find('.filters th').length +'">Nu au fost gasite rezultate</td></tr>'));
+            }
+        });
+    });
+</script>
+{% endblock content %}

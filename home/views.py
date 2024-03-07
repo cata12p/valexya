@@ -10,18 +10,22 @@ from django.http import JsonResponse
 # def get_page_name(request):
 #     resolver_match = resolve(request.path)
 #     return resolver_match.url_name
-# new_page = get_page_name(request)
+# new_page = get_page_name(request) # asta e paginarea cu /login de ex
 
 
 # Create your views here.
+def check_authentication(request):
+    if not request.user.is_authenticated:
+        request.session['page'] = 'login'
+        return render(request, "auth/login-register.html", None)
+
+
 class Router(APIView):
     def get(self, request):
         page = request.session.get('page')
-        print(page)
 
         if not request.user.is_authenticated:
-            request.resolver_match.url_name = 'login'
-            return render(request, "auth/login-register.html", None)
+            return check_authentication(request)
         
         else:
             if page == 'cars':
@@ -38,10 +42,12 @@ class Router(APIView):
 class Login(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
-            return render(request, "auth/login-register.html", None)
+            return check_authentication(request)
         
         else:
-            return redirect(reverse('raports'))
+            raports_view = Raports()
+            context = raports_view.get_incomings_data(request)
+            return render(request, "home/raports.html", context)
     
     def post(self, request):
         username = request.data.get('email')
@@ -56,14 +62,16 @@ class Login(APIView):
 
         else:
             login(request, user)
-            return redirect(reverse('raports'))
+            raports_view = Raports()
+            context = raports_view.get_incomings_data(request)
+            return render(request, "home/raports.html", context)
 
 
 class Logout(APIView):
     def post(self, request):
         if request.user.is_authenticated:
             logout(request)
-            request.resolver_match.url_name = 'login'
+            request.session['page'] = 'login'
             context = dict (
                 message = "Te-ai delogat cu succes!"
             )
@@ -79,7 +87,9 @@ class CreateAccount(APIView):
             return render(request, "auth/login-register.html", context)
         
         else:
-            return redirect(reverse('raports'))
+            raports_view = Raports()
+            context = raports_view.get_incomings_data(request)
+            return render(request, "home/raports.html", context)
         
     def post(self, request):
         username = request.data.get('email')
@@ -116,15 +126,14 @@ class CreateAccount(APIView):
                         Acum te poti autentifica in cont."
                 )
 
-            request.resolver_match.url_name = 'login'
+            request.session['page'] = 'login'
             return render(request, "auth/login-register.html", context)
 
 
 class Raports(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
-            request.resolver_match.url_name = 'login'
-            return render(request, "auth/login-register.html", None)
+            return check_authentication(request)
         
         else:
             context = self.get_incomings_data(request)
@@ -145,8 +154,7 @@ class Raports(APIView):
 class Cars(APIView):
     def get(self, request):
         if not request.user.is_authenticated:
-            request.resolver_match.url_name = 'login'
-            return render(request, "auth/login-register.html", None)
+            return check_authentication(request)
         
         else:
             context = self.get_cars_data(request)

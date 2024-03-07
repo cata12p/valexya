@@ -18,9 +18,9 @@
   /* Total with margins = 300px */
   /* --main-navigation-width: 260px; */
   /* --main-navigation-width: 20vw; */
-  --main-navigation-width: 15vw;
+  --main-navigation-width: 18vw;
   /* --main-navigation-width: 250px; */
-  --main-navigation-margins-xy: 25px;
+  --main-navigation-margins-xy: 0px;
   --total-main-navigation-width: calc(var(--main-navigation-width) + var(--main-navigation-margins-xy) * 2);
   --main-width: calc(100vw - var(--total-main-navigation-width));
 }
@@ -47,11 +47,11 @@ body {
 
 /* =============== Navigation ================ */
 .navigation {
-  margin: var(--main-navigation-margins-xy);
-  border-radius: 20px;
+  /* margin: var(--main-navigation-margins-xy); */
+  /* border-radius: 20px; */
   position: fixed;
   width: var(--main-navigation-width);
-  height: 95vh;
+  height: 100vh;
   background: var(--blue);
   transition: 0.5s;
   overflow: hidden;
@@ -130,7 +130,7 @@ body {
 
 /* Main */
 .main {
-  margin: var(--main-navigation-margins-xy) var(--main-navigation-margins-xy) var(--main-navigation-margins-xy) 0;
+  margin: 50px var(--main-navigation-margins-xy) var(--main-navigation-margins-xy) 0;
   border-radius: 20px;
   position: absolute;
   width: var(--main-width);

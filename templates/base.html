@@ -48,16 +48,15 @@
         {% endblock %}</title>
 </head>
 
-<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    {% if user.is_authenticated and page != 'login' and user.is_authenticated and page != 'register' %}
-        <!-- <div class="container"> -->
+<body>
+    {% if user.is_authenticated %}
         <div class="container-fluid p-0">
             <!-- Navigation -->
             <div class="navigation">
                 <img class="logo" src="{{ imgs }}logo.png" />
                 <ul>
                     <li>
-                        <a href="" hx-get="{% url 'raports' %}" hx-target="body" hx-trigger="click">
+                        <a href="" hx-get="{% url 'raports' %}" hx-target="body .container-fluid" hx-trigger="click">
                             <span class="icon">
                                 <ion-icon name="apps-outline"></ion-icon>
                             </span>
@@ -65,7 +64,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="" hx-get="{% url 'cars' %}" hx-target="body" hx-trigger="click">
+                        <a href="" hx-get="{% url 'cars' %}" hx-target="body .container-fluid" hx-trigger="click">
                             <span class="icon">
                                 <ion-icon name="car-outline"></ion-icon>
                             </span>
@@ -97,7 +96,7 @@
                         </a>
                     </li>
                     <li class="position-absolute bottom-0 mb-5">
-                        <a href="#" hx-post="{% url 'logout' %}" hx-target="body" hx-trigger="click">
+                        <a href="#" hx-post="{% url 'logout' %}" hx-target="body .container-fluid" hx-trigger="click">
                             <span class="icon">
                                 <ion-icon name="power-outline"></ion-icon>
                             </span>
@@ -112,12 +111,16 @@
                 {% endblock content%}
             </div>
         </div>
-    {% elif not user.is_authenticated and page == 'login' or not user.is_authenticated and page == 'register' %}
+    {% else %}
         <div class="container-fluid p-0">
             {% block content_auth %}
             {% endblock content_auth %}
         </div>
     {% endif %}
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+    </script>
 </body>
-
 </html>

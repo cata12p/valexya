@@ -1,18 +1,216 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="row " style="padding: 0 20px;">
+  <div class="row"> 
+    <div class="col-md-12">
+      {% if message %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+      <div class="row">
         {% for car in cars %}
-        <div class="card" style="width: 18rem;">
-            <img src="/static/assets/imgs/scania.jpeg" class="card-img-top" alt="scania">
-            <div class="card-body">
-              <p class="card-text">{{ car.plate_number }}</p>
-              {% for driver in car.drivers.all %}
-                <p class="card-text">{{ driver.full_name }}</p>
-            {% endfor %}
+          <div class="col-lg-4 col-md-6 d-flex">
+            <div class="card card-stats mb-4 shadow flex-fill">
+              <img src="/static/assets/imgs/scania-2.jpeg" class="card-img-top" alt="scania" style="border-radius: 0px 0px 20px 20px;">
+              <div class="card-body">
+                <div class="row bg-light shadow p-2 mb-3" style="border-radius: 5px;">
+                  <div class="col my-auto">
+                    <span class="fw-semibold text-muted text-uppercase">Nr. inmatriculare</span><br>
+                    <div class="d-inline-flex align-items-center">
+                      <div class="plate-number">
+                        <img src="/static/assets/imgs/ro-europe.png" class="card-img-top" alt="ro-europe">
+                        <h3 class="text-center m-0">{{ car.plate_number }}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-auto my-auto">
+                    {% if car.drivers.all.count == 0 %}
+                    <span class="fs-4 d-flex align-items-center text-danger"><i class="fas fa-id-card fs-2"></i><span class="ms-2 text-uppercase fw-medium">Șofer / șoferi lipsă</span></span>
+                    {% elif car.drivers.all.count >= 1 %}
+                      {% for driver in car.drivers.all %}
+                        <span class="fs-4 d-flex align-items-center"><i class="fas fa-id-card fs-2"></i><span class="ms-2 text-uppercase fw-medium">{{ driver.full_name }}</span></span>
+                      {% endfor %}
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="row bg-light shadow p-2 mb-3" style="border-radius: 5px;">
+                  <div class="col">
+                    <span class="fw-semibold text-muted text-uppercase">Venituri</span><br>
+                    <div class="d-inline-flex align-items-center">
+                      <span class="text-success me-2"><i class="fas fa-arrow-up"></i> 3.48%</span>
+                    </div>
+                  </div>
+                  <div class="col-auto d-flex align-items-center">
+                    <span class="fs-4 d-flex align-items-center"><i class="fas fa-euro-sign"></i><span class="ms-2 fs-4 fst-italic">{{ car.total_incoming_value }}</span></span>
+                  </div>
+                </div>
+                <div class="row bg-light shadow p-2 mb-3" style="border-radius: 5px;">
+                  <div class="col">
+                    <span class="fw-semibold text-muted text-uppercase">Cheltuieli</span><br>
+                    <div class="d-inline-flex align-items-center">
+                      <span class="text-danger me-2"><i class="fas fa-arrow-down"></i> 1.24%</span>
+                    </div>
+                  </div>
+                  <div class="col-auto d-flex align-items-center">
+                    <span class="fs-4 d-flex align-items-center"><i class="fas fa-euro-sign"></i><span class="ms-2 fs-4 fst-italic">{{ car.total_outcoming_value }}</span></span>
+                  </div>
+                </div>
+                <div class="row bg-light shadow p-2" style="border-radius: 5px;">
+                  <div class="col">
+                    <span class="fw-semibold text-muted text-uppercase">Balanță</span><br>
+                    <div class="d-inline-flex align-items-center">
+                      <span class="text-danger me-2"><i class="fas fa-arrow-down"></i> 1.24%</span>
+                    </div>
+                  </div>
+                  <div class="col-auto d-flex align-items-center">
+                    <span class="fs-4 d-flex align-items-center"><i class="fas fa-euro-sign"></i><span class="ms-2 fs-4 fst-italic">{{ car.total_profit_value }}</span></span>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary bg-valexya border-valexya mt-3" style="border-radius: 20px 20px 0px 0px;">Vezi mai multe detalii</button>
             </div>
           </div>
         {% endfor %}
+      </div>
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#addCar">
+        Adauga masina
+      </button>
+      <!-- Modal -->
+      <div class="modal fade" id="addCar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addCarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="addCarLabel">Adauga masina</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form class="needs-validation" hx-post="{% url 'cars' %}" hx-target="body .container-fluid" novalidate>
+              <!-- <form class="needs-validation" action="{% url 'cars' %}" method="POST" novalidate> -->
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="floatingInput">Numar inmatriculare *</label>
+                    <input type="text" class="form-control" id="floatingInput" name="plate_number" placeholder="BH11AAA" onkeyup="validatePlateNr(event)" required>
+                    <div class="valid-feedback">Camp validat!</div>
+                    <div class="invalid-feedback">Acest camp este obligatoriu!</div>
+                  </div>
+                  <div class="col-md-6 d-flex flex-column">
+                    <label for="drivers">Adauga soferi</label>
+                    <select class="select2" name="drivers[]" multiple="multiple" onchange="validateSelect2(event)" required>
+                      {% for driver in drivers %}
+                        <option value="{{ driver.id }}">{{ driver.full_name }}</option>
+                      {% endfor %}
+                    </select>
+                    <div class="valid-feedback">Camp validat!</div>
+                    <div class="invalid-feedback">Selecteaza cel putin un sofer!</div>
+                  </div>
+                </div>
+                <div class="row d-flex justify-content-between mt-5">
+                  <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Salveaza</button>
+                  </div>
+                  <div class="col-auto">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Inchide</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+  <script>
+    $(document).ready(function() {
+      $('select.select2').select2({
+        dropdownParent: $('#addCar'),
+        placeholder: 'Selecteaza soferul/soferii',
+        // allowClear: true
+      });
+    });
+
+    // (() => {
+    //   'use strict'
+
+    //   const forms = document.querySelectorAll('.needs-validation')
+
+    //   Array.from(forms).forEach(form => {
+    //     form.addEventListener('submit', event => {
+
+    //       // Verificăm doar câmpurile select2 din formular
+    //       const select2Inputs = form.querySelectorAll('span.select2-selection.select2-selection--multiple');
+    
+    //       select2Inputs.forEach(input => {
+    //         const selectedOptions = input.querySelectorAll('.select2-selection__choice');
+
+    //         if (selectedOptions.length === 0) {
+    //           input.classList.remove('is-valid');
+    //           input.classList.add('is-invalid');
+    //         } else {
+    //           input.classList.remove('is-invalid');
+    //           input.classList.add('is-valid');
+    //         }
+    //       });
+
+    //       if (!form.checkValidity()) {
+    //         event.preventDefault()
+    //         event.stopPropagation()
+    //       }
+
+    //       form.classList.add('was-validated')
+    //     }, false)
+    //   })
+    // })()
+
+    document.addEventListener('htmx:beforeRequest', function(event) {
+        const form = event.target;
+
+        const select2Inputs = form.querySelectorAll('span.select2-selection.select2-selection--multiple');
+    
+        select2Inputs.forEach(input => {
+            const selectedOptions = input.querySelectorAll('.select2-selection__choice');
+
+            if (selectedOptions.length === 0) {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            }
+        });
+
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+          // htmx.ajax('GET', form.getAttribute('hx-post'));
+          $('#addCar').modal('hide');
+        }
+        form.classList.add('was-validated');
+    });
+
+    function validatePlateNr(event) {
+      let targetValue = event.target.value;
+      let newValue = targetValue.replace(/\s/g, '');
+      event.target.value = newValue;
+    }
+
+    function validateSelect2(event) {
+      const select2Input = event.currentTarget.parentElement.querySelector('span.select2-selection.select2-selection--multiple');
+      var selectedOptions = Array.from(event.currentTarget.selectedOptions).map(option => option.value);
+      // console.log(selectedOptions, selectedOptions.length);
+
+      if (selectedOptions.length == 0) {
+        select2Input.classList.remove('is-valid');
+        select2Input.classList.add('is-invalid');
+      } else {
+        select2Input.classList.remove('is-invalid');
+        select2Input.classList.add('is-valid');
+      }
+    }
+
+  </script>
 {% endblock content %}

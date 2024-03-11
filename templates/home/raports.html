@@ -6,30 +6,6 @@
 
 {% block content %}
     <style>
-        .filterable {
-            margin-top: 15px;
-        }
-        .filterable .panel-heading .pull-right {
-            margin-top: -20px;
-        }
-        .filterable .filters input[disabled] {
-            background-color: transparent;
-            border: none;
-            cursor: auto;
-            box-shadow: none;
-            padding: 0;
-            height: auto;
-        }
-        .filterable .filters input[disabled]::-webkit-input-placeholder {
-            color: #333;
-        }
-        .filterable .filters input[disabled]::-moz-placeholder {
-            color: #333;
-        }
-        .filterable .filters input[disabled]:-ms-input-placeholder {
-            color: #333;
-        }
-
         .table.dataTable.no-footer {
             border: none;
         }
@@ -38,16 +14,17 @@
             border-bottom: 1px solid #dee2e6;
         }
         table.dataTable thead .sorting {
-            /* background-image: none !important; */
             background-image: url('https://cdn.datatables.net/1.11.5/images/sort_both.png') !important;
         }
         table.dataTable thead .sorting_asc {
             background-image: url('https://cdn.datatables.net/1.11.5/images/sort_both.png') !important;
-            /* background-image: none !important; */
         }
         table.dataTable thead .sorting_desc {
             background-image: url('https://cdn.datatables.net/1.11.5/images/sort_both.png') !important;
-            /* background-image: none !important; */
+        }
+        /* TABLE SHOW LENGTH SELECT */
+        .dataTables_wrapper .dataTables_length select {
+        border: 1px solid var(--blue);
         }
     </style>
     <div class="row">

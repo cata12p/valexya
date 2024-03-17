@@ -1,12 +1,29 @@
 from django.contrib import admin
 from django import forms
 from home import models
+from datetime import datetime
 
 
 # Register your models here.
 class UserAdmin(admin.ModelAdmin):
     list_display = ['id', 'full_name', 'email', 'is_active']
 
+
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ['id', 'get_name', 'get_value', 'get_date']
+
+    def get_name(self, obj):
+        return obj.name
+
+    def get_value(self, obj):
+        return obj.value
+    
+    def get_date(self, obj):
+        return obj.date.strftime("%d.%m.%Y %H:%M")
+
+    get_name.short_description = 'Valuta'
+    get_value.short_description = 'Valoare'
+    get_date.short_description = 'Data'
 
 class CarAdmin(admin.ModelAdmin):
     list_display = ['id', 'get_car', 'get_drivers']
@@ -101,6 +118,7 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.User, UserAdmin)
+admin.site.register(models.Course, CourseAdmin)
 admin.site.register(models.Driver, DriverAdmin)
 admin.site.register(models.Car, CarAdmin)
 admin.site.register(models.Client, ClientAdmin)

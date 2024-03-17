@@ -25,6 +25,13 @@ class User(AbstractUser):
         return f'{self.first_name} {self.last_name}'
     
 
+class Course(models.Model):
+    '''Aceasta este clasa cursurilor de la BNR, aici adaugam campuri noi'''
+    name = models.CharField(max_length=255, default=None, help_text='Numele valutei')
+    value = models.DecimalField(default=.0, max_digits=9, decimal_places=4, help_text='Valoarea valutei')
+    date = models.DateTimeField(auto_now=True, help_text='Data cursului')
+
+
 class Driver(models.Model):
     '''Aceasta este clasa Soferilor, aici adaugam campuri noi'''
     first_name = models.CharField(max_length=255, default=None, help_text='Numele soferului')
@@ -59,25 +66,26 @@ class Client(models.Model):
 class Invoice(models.Model):
     '''Aceasta este clasa Facturilor, aici adaugam campuri noi'''
     CURRENCY_CHOICES = [
-        ('RON', 'RON'),
-        ('EUR', 'EUR')
+        ('ron', 'RON'),
+        ('eur', 'EUR')
     ]
 
     SERIES_CHOICES = [
-        ('VAL', 'VAL'),
-        ('VIC', 'VIC'),
-        ('VLX', 'VLX')
+        ('val', 'VAL'),
+        ('vic', 'VIC'),
+        ('vlx', 'VLX')
     ]
 
     STATUS_CHOICES = [
-        ('EMISA', 'EMISA'),
-        ('INCASATA', 'INCASATA'),
-        ('DEPASITA', 'DEPASITA')
+        ('issued', 'Emisă'),
+        ('collected', 'Încasată'),
+        ('paid', 'Plătită'),
+        ('exceed', 'Depăsită')
     ]
 
     CATEGORY_CHOICES = [
-        ('INCOMING', 'VENIT'),
-        ('OUTCOMING', 'CHELTUIALA')
+        ('incoming', 'Venit'),
+        ('outgoing', 'Cheltuială')
     ]
 
     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, default=None,
@@ -85,6 +93,7 @@ class Invoice(models.Model):
     series = models.CharField(max_length=3, choices=SERIES_CHOICES, help_text='Seria facturii')
     number = models.IntegerField(default=0, help_text='Numarul facturii')
     emit_date = models.DateTimeField(default=None, null=True, help_text='Data emitere factura')
+    due_date = models.DateTimeField(default=None, null=True, help_text='Data scadentă factura')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=None, null=True, help_text='Statusul facturii')
     value = models.DecimalField(default=.0, max_digits=9, decimal_places=2, help_text='Valoarea facturata')
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, help_text='Valuta de pe factura')

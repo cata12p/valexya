@@ -24,26 +24,61 @@
         }
         /* TABLE SHOW LENGTH SELECT */
         .dataTables_wrapper .dataTables_length select {
-        border: 1px solid var(--blue);
+            border: 1px solid var(--blue);
+            color: #ffffff !important;
+            background: var(--blue);
+            cursor: pointer;
+            outline: none;
+            border-radius: 0.375rem;
+        }
+        .dataTables_wrapper .dataTables_length select:hover {
+            color: var(--blue) !important;
+            background: #ffffff;
+        }
+        /* TABLE SHOW PAGINATION NUMBERS */
+        .dataTables_wrapper .dataTables_paginate {
+            padding-top: 0.755em;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            border: 1px solid var(--blue);
+            color: #ffffff !important;
+            background: var(--blue);
+            border-radius: 50%;
+            padding: 2px 10px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border: 1px solid var(--blue);
+            color: var(--blue);
+            background: transparent;
+            border-radius: 50%;
+            padding: 2px 10px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            border: 1px solid var(--blue);
+            color: #ffffff !important;
+            background: var(--blue);
         }
     </style>
     <div class="row">
         <div class="col-md-12 d-flex align-items-center">
             <h2 class="m-0 me-4" style="font-size: 24px; color: var(--blue);">Vezi situația</h2>
-            <a href="#" class="btn btn-outline-primary border-valexya color-valexya me-2">Zilnică</a>
-            <a href="#" class="btn btn-outline-primary border-valexya color-valexya me-2">Săptămânală</a>
-            <a href="#" class="btn btn-outline-primary border-valexya color-valexya me-2">Lunară</a>
-            <a href="#" class="btn btn-outline-primary border-valexya color-valexya">Anuală</a>
+            <a href="" class="btn btn-outline-primary border-valexya color-valexya me-2 {% if request.session.type == 'daily' %}active{% endif %}" hx-get="{% url 'raports' type='daily' %}" hx-target="body .container-fluid" hx-trigger="click">Zilnică</a>
+            <a href="" class="btn btn-outline-primary border-valexya color-valexya me-2 {% if request.session.type == 'weekly' %}active{% endif %}" hx-get="{% url 'raports' type='weekly' %}" hx-target="body .container-fluid" hx-trigger="click">Săptămânală</a>
+            <a href="" class="btn btn-outline-primary border-valexya color-valexya me-2 {% if request.session.type == 'monthly' %}active{% endif %}" hx-get="{% url 'raports' type='monthly' %}" hx-target="body .container-fluid" hx-trigger="click">Lunară</a>
+            <a href="" class="btn btn-outline-primary border-valexya color-valexya me-2 {% if request.session.type == 'yearly' %}active{% endif %}" hx-get="{% url 'raports' type='yearly' %}" hx-target="body .container-fluid" hx-trigger="click">Anuală</a>
+            <a href="" class="btn btn-outline-primary border-valexya color-valexya {% if request.session.type is None or request.session.type == 'general' %}active{% endif %}" hx-get="{% url 'raports' type='general' %}" hx-target="body .container-fluid" hx-trigger="click">Generală</a>
         </div>
     </div>
     <div class="row mt-5">
         <div class="col-sm-6 col-md-3 d-flex">
             <div class="card card-stats mb-4 mb-xl-0 shadow flex-fill">
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row d-flex align-items-center">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Venituri</h5>
-                            <span class="h2 fw-semibold mb-0">350,897</span>
+                            <!-- <span class="h2 fw-semibold mb-0">{{ raports.total_incomings }}</span> -->
+                            <span class="h3 fw-semibold mb-0 fst-italic d-flex align-items-center"><i class="h5 mb-0 me-2 fas fa-euro-sign"></i>{{ raports.total_incomings }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-success text-white rounded-circle shadow">
@@ -64,7 +99,8 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Cheltuieli</h5>
-                            <span class="h2 fw-semibold mb-0">2,356</span>
+                            <!-- <span class="h2 fw-semibold mb-0">2,356</span> -->
+                            <span class="h3 fw-semibold mb-0 fst-italic d-flex align-items-center"><i class="h5 mb-0 me-2 fas fa-euro-sign"></i>{{ raports.total_outgoings }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
@@ -85,7 +121,8 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Balanta</h5>
-                            <span class="h2 fw-semibold mb-0">924</span>
+                            <!-- <span class="h2 fw-semibold mb-0">924</span> -->
+                            <span class="h3 fw-semibold mb-0 fst-italic d-flex align-items-center"><i class="h5 mb-0 me-2 fas fa-euro-sign"></i>{{ raports.total_balance }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
@@ -107,7 +144,8 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0 fs-6">Profitabilitate</h5>
-                            <span class="h2 fw-semibold mb-0">49,65%</span>
+                            <!-- <span class="h2 fw-semibold mb-0">49,65%</span> -->
+                            <span class="h3 fw-semibold mb-0 fst-italic d-flex align-items-center"><i class="h5 mb-0 me-2 fas fa-percent"></i>{{ raports.total_profitability }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-info text-white rounded-circle shadow">
@@ -124,14 +162,14 @@
         </div>
     </div>
     <div class="row mt-5">
-        <div class="col-md-8 d-flex " style="border-radius: 20px;">
+        <div class="col-md-8 d-flex">
             <div class="card card-stats shadow flex-fill">
                 <div class="card-body filterable">
                     <div class="d-flex align-items-center mb-5">
-                        <h2 class="m-0 me-auto" style="font-size: 24px; color: var(--blue);">
-                            Cheltuieli <span class="text-danger mr-2"><i class="fas fa-arrow-down"style="font-size: 24px;"></i></span>
+                        <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
+                            Cheltuieli <span class="text-danger mr-2"><i class="fas fa-arrow-down" style="font-size: 24px;"></i></span>
                         </h2>
-                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-filter"></i> Cautare</button>
+                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-search"></i> Cautare</button>
                     </div>
                     <table class="table table-responsive" id="tabel-cheltuieli">
                         <thead>
@@ -143,12 +181,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for outcoming in outcomings %}
+                            {% for outgoing in outgoings %}
                                 <tr>
-                                    <td>{{ outcoming.client }}</td>
-                                    <td>{{ outcoming.description }}</td>
-                                    <td>{{ outcoming.emit_date|date:"d.m.Y" }}</td>
-                                    <td>{{ outcoming.value }} {{ outcoming.currency }}</td>
+                                    <td>{{ outgoing.client }}</td>
+                                    <td>{{ outgoing.description }}</td>
+                                    <td>{{ outgoing.emit_date|date:"d.m.Y" }}</td>
+                                    <td>{{ outgoing.value }} {{ outgoing.currency|upper }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -162,9 +200,9 @@
                 <div class="card-body filterable">
                     <div class="d-flex align-items-center mb-5">
                         <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
-                            Venituri <span class="text-success mr-2"><i class="fas fa-arrow-up"style="font-size: 24px;"></i></span>
+                            Venituri <span class="text-success mr-2"><i class="fas fa-arrow-up" style="font-size: 24px;"></i></span>
                         </h2>
-                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-filter"></i> Filtrare</button>
+                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-search"></i> Cautare</button>
                     </div>
                     <table class="table table-responsive" id="tabel-venituri">
                         <thead>
@@ -179,7 +217,7 @@
                                 <tr>
                                     <td>{{ incoming.series }}{{ incoming.number }}</td>
                                     <td>{{ incoming.client }}</td>
-                                    <td>{{ incoming.value }} {{ incoming.currency }}</td>
+                                    <td>{{ incoming.value }} {{ incoming.currency|upper }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -189,16 +227,22 @@
             </div>
         </div>
     </div>
+    <div class="row mt-5">
+        <div id="chart"></div>
+    </div>
 </div>
 <script>
-    $(document).ready(function(){
-        var table = $('#tabel-cheltuieli').DataTable({
+    $(document).ready(function() {
+        var commonOptions = {
             "language": {
                 "search": "Căutare:",
-                "lengthMenu": "Afișare _MENU_ înregistrări pe pagină",
+                // "lengthMenu": "Afișare _MENU_ înregistrări pe pagină",
+                "lengthMenu": "Afișare _MENU_ înregistrări",
                 "zeroRecords": "Nu s-au găsit înregistrări",
-                "info": "Afișate de la _START_ până la _END_ din _TOTAL_ înregistrări",
-                "infoEmpty": "Afișate de la 0 până la 0 din 0 înregistrări",
+                // "info": "Afișate de la _START_ până la _END_ din _TOTAL_ înregistrări",
+                "info": "<b>TOTAL</b> - _TOTAL_ înregistrări",
+                // "infoEmpty": "Afișate de la 0 până la 0 din 0 înregistrări",
+                "infoEmpty": "0 înregistrări",
                 "infoFiltered": "(filtrate dintr-un total de _MAX_ înregistrări)",
                 "paginate": {
                     "first": "Prima",
@@ -207,6 +251,12 @@
                     "previous": "Anterioara"
                 }
             },
+            searching: false,
+            pagingType: "numbers",
+            paging: true,
+            info: true
+        }
+        var table1Options = Object.assign({}, commonOptions, {
             "columnDefs": [{
                 "type": "num",
                 "targets": 3,
@@ -216,13 +266,25 @@
                     }
                     return data;
                 }
-            }],
-            searching: false,
-            paging: true,
-            info: true
+            }]
         });
 
-        $('.filterable .btn-filter').click(function(){
+        var table2Options = Object.assign({}, commonOptions, {
+            "columnDefs": [{
+                "type": "num",
+                "targets": 2,
+                "render": function(data, type, row) {
+                    if (type === 'sort' || type === 'type') {
+                        return parseFloat(data.replace(/[^\d.-]/g, ''));
+                    }
+                    return data;
+                }
+            }]
+        });
+        $('#tabel-cheltuieli').DataTable(table1Options);
+        $('#tabel-venituri').DataTable(table2Options);
+
+        $('.filterable .btn-filter').click(function() {
             var $panel = $(this).parents('.filterable'),
             $filters = $panel.find('.filters input'),
             $tbody = $panel.find('.table tbody');
@@ -236,7 +298,7 @@
             }
         });
 
-        $('.filterable .filters input').keyup(function(e){
+        $('.filterable .filters input').keyup(function(e) {
             var code = e.keyCode || e.which;
             if (code == '9') return;
             var $input = $(this),
@@ -257,5 +319,106 @@
             }
         });
     });
+
+    var options = {
+        series: [
+            {
+                name: 'Facturi incasate',
+                data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
+            }, 
+            {
+                name: 'Facturi emise',
+                data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
+            }, 
+            {
+                name: 'Cheltuieli',
+                data: [35, 41, 36, 26, 45, 48, 52, 53, 41]
+            }
+        ],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '50%',
+                endingShape: 'rounded',
+                borderRadius: 10,
+                borderRadiusApplication: "top", // "end start", // or  ["end, "start"]
+                // borderRadiusWhenStacked: "both",
+                dataLabels: {
+                    position: 'top', // top, center, bottom
+                },
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return val + "K";
+            },
+            offsetY: -20,
+            // offsetX: 4,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        // title: {
+        //   text: 'Average High & Low Temperature',
+        //   align: 'left'
+        // },
+        xaxis: {
+            categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+        },
+        // yaxis: {
+        //   title: {
+        //     text: '$ (thousands)'
+        //   }
+        // },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return "$ " + val + " thousands"
+                }
+            }
+        },
+        grid: {
+            borderColor: '#dedede',
+            strokeDashArray: 4, // Setează lungimea și spațiul dintre puncte pentru linia punctată
+            // xaxis: {
+            //     lines: {
+            //         show: true
+            //     }
+            // },
+            yaxis: {
+                lines: {
+                    show: true
+                }
+            },
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'right',
+          floating: true,
+          offsetY: -5,
+        //   offsetY: -25,
+        //   offsetX: -5
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
 </script>
 {% endblock content %}

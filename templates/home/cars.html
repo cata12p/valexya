@@ -9,6 +9,19 @@
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
       {% endif %}
+      <div class="row mb-5">
+        <div class="col-md-12 d-flex align-items-center">
+            <h2 class="m-0 me-4" style="font-size: 24px; color: var(--blue);">Vezi situația</h2>
+            <a href="#" class="btn btn-primary bg-valexya border-valexya me-2">Zilnică</a>
+            <a href="#" class="btn btn-primary bg-valexya border-valexya me-2">Săptămânală</a>
+            <a href="#" class="btn btn-primary bg-valexya border-valexya me-2">Lunară</a>
+            <a href="#" class="btn btn-primary bg-valexya border-valexya">Anuală</a>
+            <form class="d-flex ms-auto" role="search">
+              <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+              <button class="btn btn-primary bg-valexya border-valexya" type="submit">Search</button>
+            </form>
+        </div>
+      </div>
       <div class="row">
         {% for car in cars %}
           <div class="col-lg-4 col-md-6 d-flex">
@@ -54,7 +67,7 @@
                     </div>
                   </div>
                   <div class="col-auto d-flex align-items-center">
-                    <span class="fs-4 d-flex align-items-center"><i class="fas fa-euro-sign"></i><span class="ms-2 fs-4 fst-italic">{{ car.total_outcoming_value }}</span></span>
+                    <span class="fs-4 d-flex align-items-center"><i class="fas fa-euro-sign"></i><span class="ms-2 fs-4 fst-italic">{{ car.total_outgoing_value }}</span></span>
                   </div>
                 </div>
                 <div class="row bg-light shadow p-2" style="border-radius: 5px;">
@@ -69,7 +82,8 @@
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-primary bg-valexya border-valexya mt-3" style="border-radius: 20px 20px 0px 0px;">Vezi mai multe detalii</button>
+              <button type="button" class="btn btn-primary bg-valexya border-valexya mt-3" style="border-radius: 20px 20px 0px 0px;"
+              hx-get="{% url 'edit-car' id=car.id %}" hx-target="body .container-fluid" hx-trigger="click">Vezi mai multe detalii</button>
             </div>
           </div>
         {% endfor %}

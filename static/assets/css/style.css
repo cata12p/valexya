@@ -195,6 +195,11 @@ body {
   border-color: var(--blue);
 }
 
+.btn.active {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+
 /* ICONS RAPORTS */
 .icon {
   width: 3rem;

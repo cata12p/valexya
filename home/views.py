@@ -3,10 +3,12 @@ from django.urls import reverse, resolve
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login, logout
 from django.apps import apps
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import requests
 import xml.etree.ElementTree as ET
 from decimal import Decimal
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 
 # def get_page_name(request):
@@ -14,29 +16,63 @@ from decimal import Decimal
 #     return resolver_match.url_name
 # new_page = get_page_name(request) # asta e paginarea cu /login de ex
 
-# views.py
 
-def get_bnr_exchange_rate(currency_code):
-    url = 'https://www.bnr.ro/nbrfxrates.xml'
-    response = requests.get(url)
-    
-    if response.status_code == 200:
-        root = ET.fromstring(response.content)
-        for cube in root.iter('{http://www.bnr.ro/xsd}Cube'):
-            for rate in cube.iter('{http://www.bnr.ro/xsd}Rate'):
-                currency = rate.attrib.get('currency')
-                rate_value = Decimal(rate.text)
-                if currency == currency_code:
-                    return rate_value
-    
-    return None
-
-
-# Create your views here.
 def check_authentication(request):
     if not request.user.is_authenticated:
         request.session['page'] = 'login'
         return render(request, "auth/login-register.html", None)
+
+
+def get_bnr_exchange_rate(currency_code):
+    course_obj = apps.get_model('home.Course').objects.filter(name=currency_code, date__date=datetime.now().date()).first()
+
+    if course_obj is not None:
+        return course_obj.value
+
+    else:
+        url = 'https://www.bnr.ro/nbrfxrates.xml'
+        response = requests.get(url)
+        
+        if response.status_code == 200:
+            root = ET.fromstring(response.content)
+            for cube in root.iter('{http://www.bnr.ro/xsd}Cube'):
+                for rate in cube.iter('{http://www.bnr.ro/xsd}Rate'):
+                    currency = rate.attrib.get('currency')
+                    rate_value = Decimal(rate.text)
+                    if currency == currency_code:
+                        course_data = dict (
+                            name = currency,
+                            value = rate_value
+                        )
+                        course_obj = apps.get_model('home.Course').objects.create(**course_data)
+                        course_obj.save()
+                        
+                        return rate_value
+        
+    return None
+
+
+def get_dates_range(date_type):
+    today = datetime.now()
+
+    if date_type == 'weekly':
+        day_of_week = today.weekday()
+        start_date = today - timedelta(days=day_of_week)
+        end_date = start_date + timedelta(days=6)
+
+    elif date_type == 'monthly':
+        start_date = today.replace(day=1)
+        next_month = today.replace(day=28) + timedelta(days=4)
+        end_date = next_month - timedelta(days=next_month.day)
+
+    elif date_type == 'yearly':
+        start_date = today.replace(month=1, day=1)
+        end_date = today.replace(month=12, day=31)
+
+    else:
+        raise ValueError("Tip de data invalid")
+
+    return start_date, end_date
 
 
 class Router(APIView):
@@ -47,15 +83,25 @@ class Router(APIView):
             return check_authentication(request)
         
         else:
-            if page == 'cars':
+            if page is None or page == 'raports':
+                raports_view = Raports()
+                context = raports_view.get_incomings_data(request, request.session.get('type'))
+                return render(request, "home/raports.html", context)
+            
+            elif page == 'cars':
                 cars_view = Cars()
                 context = cars_view.get_cars_data(request)
                 return render(request, "home/cars.html", context)
-
-            elif page == 'raports':
-                raports_view = Raports()
-                context = raports_view.get_incomings_data(request)
-                return render(request, "home/raports.html", context)
+            
+            elif page == 'edit-car':
+                cars_view = CarEdit()
+                context = cars_view.get_car_data(request, request.session.get('entity'))
+                return render(request, "home/edit-car.html", context)
+            
+            elif page == 'invoices':
+                invoices_view = Invoices()
+                context = invoices_view.get_invoices_data(request)
+                return render(request, "home/invoices.html", context)
 
 
 class Login(APIView):
@@ -89,6 +135,7 @@ class Login(APIView):
 class Logout(APIView):
     def post(self, request):
         if request.user.is_authenticated:
+            request.session.flush()
             logout(request)
             request.session['page'] = 'login'
             context = dict (
@@ -150,22 +197,56 @@ class CreateAccount(APIView):
 
 
 class Raports(APIView):
-    def get(self, request):
+    def get(self, request, type = None):
         if not request.user.is_authenticated:
             return check_authentication(request)
         
         else:
-            context = self.get_incomings_data(request)
+            context = self.get_incomings_data(request, type)
             return render(request, "home/raports.html", context)
 
-    def get_incomings_data(self, request):
+    def get_incomings_data(self, request, type = None):
         request.session['page'] = 'raports'
-        # data_incoming_invoices = apps.get_model('home.InvoiceCar').objects.filter(invoice__category='INCOMING')
-        incomings_data = apps.get_model('home.Invoice').objects.filter(category='INCOMING')
-        outcomings_data = apps.get_model('home.Invoice').objects.filter(category='OUTCOMING')
+        request.session['type'] = type
+        if type == 'daily':
+            # data_incoming_invoices = apps.get_model('home.InvoiceCar').objects.filter(invoice__category='incoming')
+            incomings_data = apps.get_model('home.Invoice').objects.filter(category='incoming', emit_date__date=datetime.now().date())
+            outgoings_data = apps.get_model('home.Invoice').objects.filter(category='outgoing', emit_date__date=datetime.now().date())
+
+        elif type in ['weekly', 'monthly', 'yearly']:
+            # data_incoming_invoices = apps.get_model('home.InvoiceCar').objects.filter(invoice__category='incoming')
+            start_date, end_date = get_dates_range(type)
+            incomings_data = apps.get_model('home.Invoice').objects.filter(category='incoming', emit_date__range=[start_date.date(), end_date.date()])
+            outgoings_data = apps.get_model('home.Invoice').objects.filter(category='outgoing', emit_date__range=[start_date.date(), end_date.date()])
+
+        elif type is None or type == 'general':
+            # data_incoming_invoices = apps.get_model('home.InvoiceCar').objects.filter(invoice__category='incoming')
+            incomings_data = apps.get_model('home.Invoice').objects.filter(category='incoming')
+            outgoings_data = apps.get_model('home.Invoice').objects.filter(category='outgoing')
+
+
+        raports_data = dict(
+            total_incomings = 0,
+            total_outgoings = 0,
+            total_balance = 0
+        )
+        for incoming_data in incomings_data:
+            raports_data['total_incomings'] += incoming_data.value / get_bnr_exchange_rate('EUR') if incoming_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else incoming_data.value
+
+        for outgoing_data in outgoings_data:
+            raports_data['total_outgoings'] += outgoing_data.value / get_bnr_exchange_rate('EUR') if outgoing_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else outgoing_data.value
+
+        balance = raports_data['total_incomings'] - raports_data['total_outgoings']
+        profitability = (balance / raports_data['total_incomings']) * 100
+        raports_data['total_incomings'] = "{:,.2f}".format(raports_data['total_incomings'])
+        raports_data['total_outgoings'] = "{:,.2f}".format(raports_data['total_outgoings'])
+        raports_data['total_balance'] = "{:,.2f}".format(balance)
+        raports_data['total_profitability'] = "{:,.2f}".format(profitability)
+
         context = dict (
             incomings = incomings_data,
-            outcomings = outcomings_data
+            outgoings = outgoings_data,
+            raports = raports_data
         )
         return context
 
@@ -208,30 +289,135 @@ class Cars(APIView):
         cars_invoice_values = dict()
         for invoice_car in invoice_cars:
             car_id = invoice_car.car_id
-            incoming_value, outcoming_value = 0, 0
-            if invoice_car.invoice.category == 'INCOMING':
-                incoming_value = invoice_car.value / get_bnr_exchange_rate('EUR') if invoice_car.invoice.currency == 'RON' and get_bnr_exchange_rate('EUR') else invoice_car.value
+            incoming_value, outgoing_value = 0, 0
+            if invoice_car.invoice.category == 'incoming':
+                incoming_value = invoice_car.value / get_bnr_exchange_rate('EUR') if invoice_car.invoice.currency == 'ron' and get_bnr_exchange_rate('EUR') else invoice_car.value
             else:
-                outcoming_value = invoice_car.value / get_bnr_exchange_rate('EUR') if invoice_car.invoice.currency == 'RON' and get_bnr_exchange_rate('EUR') else invoice_car.value
+                outgoing_value = invoice_car.value / get_bnr_exchange_rate('EUR') if invoice_car.invoice.currency == 'ron' and get_bnr_exchange_rate('EUR') else invoice_car.value
 
             if car_id not in cars_invoice_values:
-                cars_invoice_values[car_id] = {'incoming': 0, 'outcoming': 0}
+                cars_invoice_values[car_id] = {'incoming': 0, 'outgoing': 0}
 
             cars_invoice_values[car_id]['incoming'] += incoming_value
-            cars_invoice_values[car_id]['outcoming'] += outcoming_value
+            cars_invoice_values[car_id]['outgoing'] += outgoing_value
 
         # Adaugă suma valorilor facturate fiecărei mașini în context
         for car in cars_data:
-            car_invoice_values = cars_invoice_values.get(car.id, {'incoming': 0, 'outcoming': 0})
+            car_invoice_values = cars_invoice_values.get(car.id, {'incoming': 0, 'outgoing': 0})
             car.total_incoming_value = "{:,.2f}".format(car_invoice_values['incoming'])
-            car.total_outcoming_value = "{:,.2f}".format(car_invoice_values['outcoming'])
-            car.total_profit_value = "{:,.2f}".format(car_invoice_values['incoming'] - car_invoice_values['outcoming'])
+            car.total_outgoing_value = "{:,.2f}".format(car_invoice_values['outgoing'])
+            car.total_profit_value = "{:,.2f}".format(car_invoice_values['incoming'] - car_invoice_values['outgoing'])
             # car.currency = "EUR"
 
-        print(cars_data)
+        # print(cars_data)
 
         context = dict(
             cars = cars_data,
             drivers = drivers_data
+        )
+        return context
+
+
+class CarEdit(APIView):
+    def get(self, request, id = None):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            context = self.get_car_data(request, id)
+            return render(request, "home/edit-car.html", context)
+        
+    def post(self, request, id = None):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            invoice_data = dict (
+                client = apps.get_model('home.Client').objects.get(pk=request.data.get('client')) if request.data.get('client') else None,
+                series = request.data.get('series'),
+                number = request.data.get('number'),
+                emit_date = request.data.get('emit_date'),
+                due_date = request.data.get('due_date'),
+                category = request.data.get('category'),
+                status = request.data.get('status'),
+                value = request.data.get('value'),
+                currency = request.data.get('currency'),
+                description = request.data.get('description')
+            )
+            
+            invoice_obj = apps.get_model('home.Invoice').objects.create(**invoice_data)
+            invoice_obj.save()
+
+            invoice_car_data = dict (
+                invoice = invoice_obj,
+                car = apps.get_model('home.Car').objects.get(pk=request.session.get('entity')),
+                expense_category = apps.get_model('home.ExpenseCategory').objects.get(pk=request.data.get('expense_category')) if request.data.get('expense_category') else None,
+                value = invoice_obj.value
+            )
+            invoice_car_obj = apps.get_model('home.InvoiceCar').objects.create(**invoice_car_data)
+            invoice_car_obj.save()
+
+            context = self.get_car_data(request, id)
+            context['message'] = "Factura a fost adaugata cu succes!"
+            return render(request, "home/edit-car.html", context)
+        
+    def get_car_data(self, request, id = None):
+        request.session['page'] = 'edit-car'
+        request.session['entity'] = id
+        car_data = apps.get_model('home.Car').objects.get(pk=id)
+        clients_data = apps.get_model('home.Client').objects.all()
+        expense_categories_data = apps.get_model('home.ExpenseCategory').objects.all()
+
+        invoice_cars = apps.get_model('home.InvoiceCar').objects.select_related('invoice').filter(car__id=id)
+        # print(invoice_cars)
+
+        # Calculează suma valorilor facturate pentru fiecare mașină
+        cars_invoice_values = dict()
+        for invoice_car in invoice_cars:
+            car_id = invoice_car.car_id
+            incoming_value, outgoing_value = 0, 0
+            if invoice_car.invoice.category == 'incoming':
+                incoming_value = invoice_car.value / get_bnr_exchange_rate('EUR') if invoice_car.invoice.currency == 'ron' and get_bnr_exchange_rate('EUR') else invoice_car.value
+            else:
+                outgoing_value = invoice_car.value / get_bnr_exchange_rate('EUR') if invoice_car.invoice.currency == 'ron' and get_bnr_exchange_rate('EUR') else invoice_car.value
+
+            if car_id not in cars_invoice_values:
+                cars_invoice_values[car_id] = {'incoming': 0, 'outgoing': 0}
+
+            cars_invoice_values[car_id]['incoming'] += incoming_value
+            cars_invoice_values[car_id]['outgoing'] += outgoing_value
+
+        # Adaugă suma valorilor facturate fiecărei mașini în context
+        car_invoice_values = cars_invoice_values.get(id, {'incoming': 0, 'outgoing': 0})
+        car_data.total_incoming_value = "{:,.2f}".format(car_invoice_values['incoming'])
+        car_data.total_outgoing_value = "{:,.2f}".format(car_invoice_values['outgoing'])
+        car_data.total_profit_value = "{:,.2f}".format(car_invoice_values['incoming'] - car_invoice_values['outgoing'])
+        # car.currency = "EUR"
+
+        context = dict(
+            car = car_data,
+            clients = clients_data,
+            expense_categories = expense_categories_data,
+            emit_date = datetime.now().date(),
+            due_date = datetime.now().date() + relativedelta(months=1),
+            invoices_car = invoice_cars
+        )
+        return context
+    
+
+class Invoices(APIView):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            context = self.get_invoices_data(request)
+            return render(request, "home/invoices.html", context)
+
+    def get_invoices_data(self, request):
+        request.session['page'] = 'invoices'
+        incomings_data = apps.get_model('home.Invoice').objects.filter(category='incoming')
+        context = dict (
+            invoices = incomings_data
         )
         return context

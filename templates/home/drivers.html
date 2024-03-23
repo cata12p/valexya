@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}
+    VALEXYA ICHIM S.R.L. - Șoferi
+{% endblock %}
+
+{% block content %}
+    <div id="session-page" data-page="{{ request.session.page }}"></div>
+    {% block js %}
+        <script src="{{ js }}tables.js"></script>
+    {% endblock %}
+
+    {% block css %}
+        <link rel="stylesheet" href="{{ css }}data_tables.css">
+    {% endblock %}
+
+    <div class="row"> 
+        <div class="col-md-12 d-flex align-items-center">
+            <div class="card card-stats shadow w-100">
+                <div class="card-body filterable">
+                    <div class="d-flex align-items-center mb-5">
+                        <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
+                            Soferi
+                        </h2>
+                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-search"></i> Cautare</button>
+                    </div>
+                    <table class="table table-responsive table-striped" id="tabel-soferi">
+                        <thead>
+                            <tr class="filters">
+                                <th class="ps-0"><input type="text" class="form-control" placeholder="Nume" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Prenume" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Mașină / Mașini" disabled></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for driver in drivers %}
+                                <tr>
+                                    <td>{{ driver.first_name }}</td>
+                                    <td>{{ driver.last_name }}</td>
+                                    <td>
+                                        {% if driver.car_set.exists %}
+                                            {% for car in driver.car_set.all %}
+                                                <div class="d-inline-flex align-items-center">
+                                                    <div class="plate-number">
+                                                        <img src="/static/assets/imgs/ro-europe.png" class="card-img-top" alt="ro-europe">
+                                                        <h3 class="text-center m-0">{{ car.plate_number }}</h3>
+                                                    </div>
+                                                </div>
+                                              <!-- {% if not forloop.last %} / {% endif %} -->
+                                            {% endfor %}
+                                        {% else %}
+                                            <span class="ms-2 text-uppercase fw-medium text-danger">Nesetat</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        console.log('da', "{{ request.session.page }}");
+    </script>
+{% endblock content %}

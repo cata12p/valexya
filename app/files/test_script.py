@@ -38,4 +38,3 @@ for date_type in date_types:
     start_date, end_date = get_dates_range(date_type)
     print(f"Data de la începutul {date_type} curent:", start_date.date())
     print(f"Data de la sfârșitul {date_type} curent:", end_date.date())
-

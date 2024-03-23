@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.apps import apps
 from django.http import JsonResponse, HttpResponse
 import requests
+from requests.exceptions import ConnectTimeout, RequestException, Timeout
 import xml.etree.ElementTree as ET
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -30,24 +31,36 @@ def get_bnr_exchange_rate(currency_code):
         return course_obj.value
 
     else:
-        url = 'https://www.bnr.ro/nbrfxrates.xml'
-        response = requests.get(url)
-        
-        if response.status_code == 200:
-            root = ET.fromstring(response.content)
-            for cube in root.iter('{http://www.bnr.ro/xsd}Cube'):
-                for rate in cube.iter('{http://www.bnr.ro/xsd}Rate'):
-                    currency = rate.attrib.get('currency')
-                    rate_value = Decimal(rate.text)
-                    if currency == currency_code:
-                        course_data = dict (
-                            name = currency,
-                            value = rate_value
-                        )
-                        course_obj = apps.get_model('home.Course').objects.create(**course_data)
-                        course_obj.save()
+        try:
+            url = 'https://www.bnr.ro/nbrfxrates.xml'
+            response = requests.get(url, timeout = 10)
+            
+            if response.status_code == 200:
+                root = ET.fromstring(response.content)
+                for cube in root.iter('{http://www.bnr.ro/xsd}Cube'):
+                    for rate in cube.iter('{http://www.bnr.ro/xsd}Rate'):
+                        currency = rate.attrib.get('currency')
+                        rate_value = Decimal(rate.text)
+                        if currency == currency_code:
+                            course_data = dict (
+                                name = currency,
+                                value = rate_value
+                            )
+                            course_obj = apps.get_model('home.Course').objects.create(**course_data)
+                            course_obj.save()
+                            
+                            return rate_value
                         
-                        return rate_value
+        except (ConnectTimeout, ConnectionError, Timeout, RequestException) as e:
+            print(f"O eroare a apărut în timpul cererii către serverul BNR: {e}")
+
+            course_obj = apps.get_model('home.Course').objects.filter(name=currency_code).last()
+
+            if course_obj is not None:
+                return course_obj.value
+            
+            else:
+                return Decimal('4.9707')
         
     return None
 
@@ -102,6 +115,11 @@ class Router(APIView):
                 invoices_view = Invoices()
                 context = invoices_view.get_invoices_data(request)
                 return render(request, "home/invoices.html", context)
+            
+            elif page == 'drivers':
+                drivers_view = Drivers()
+                context = drivers_view.get_drivers_data(request, request.session.get('entity'))
+                return render(request, "home/drivers.html", context)
 
 
 class Login(APIView):
@@ -226,19 +244,25 @@ class Raports(APIView):
 
 
         raports_data = dict(
-            total_incomings = 0,
             total_outgoings = 0,
-            total_balance = 0
+            total_balance = 0,
+            total_issued = 0,
+            total_collected = 0
         )
         for incoming_data in incomings_data:
-            raports_data['total_incomings'] += incoming_data.value / get_bnr_exchange_rate('EUR') if incoming_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else incoming_data.value
+            value = incoming_data.value / get_bnr_exchange_rate('EUR') if incoming_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else incoming_data.value
+            # if incoming_data.status == 'issued':
+            raports_data['total_issued'] += value
+            if incoming_data.status == 'collected':
+                raports_data['total_collected'] += value
+
 
         for outgoing_data in outgoings_data:
             raports_data['total_outgoings'] += outgoing_data.value / get_bnr_exchange_rate('EUR') if outgoing_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else outgoing_data.value
 
-        balance = raports_data['total_incomings'] - raports_data['total_outgoings']
-        profitability = (balance / raports_data['total_incomings']) * 100
-        raports_data['total_incomings'] = "{:,.2f}".format(raports_data['total_incomings'])
+        balance = raports_data['total_collected'] - raports_data['total_outgoings']
+        profitability = (balance / raports_data['total_collected']) * 100
+        raports_data['total_collected'] = "{:,.2f}".format(raports_data['total_collected'])
         raports_data['total_outgoings'] = "{:,.2f}".format(raports_data['total_outgoings'])
         raports_data['total_balance'] = "{:,.2f}".format(balance)
         raports_data['total_profitability'] = "{:,.2f}".format(profitability)
@@ -419,5 +443,24 @@ class Invoices(APIView):
         incomings_data = apps.get_model('home.Invoice').objects.filter(category='incoming')
         context = dict (
             invoices = incomings_data
+        )
+        return context
+
+
+
+class Drivers(APIView):
+    def get(self, request, id = None):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            context = self.get_drivers_data(request, id)
+            return render(request, "home/drivers.html", context)
+
+    def get_drivers_data(self, request, id = None):
+        request.session['page'] = 'drivers'
+        drivers_data = apps.get_model('home.Driver').objects.all()
+        context = dict (
+            drivers = drivers_data
         )
         return context

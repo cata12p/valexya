@@ -3,14 +3,15 @@
   --blue: #1F0551;
   --purple: #2b1750;
   --white: #ffffff;
-  --gray: #f2f2f2;
+  --grey: #f2f2f2;
   --black1: #222;
   --black2: #999;
   /* Total with margins = 300px */
   /* --main-navigation-width: 260px; */
   /* --main-navigation-width: 20vw; */
-  --main-navigation-width: 18vw;
-  /* --main-navigation-width: 250px; */
+  /* --main-navigation-width: 18vw; */
+  --main-navigation-width-opened: 250px;
+  --main-navigation-width: 90px;
   --main-navigation-margins-xy: 0px;
   --total-main-navigation-width: calc(var(--main-navigation-width) + var(--main-navigation-margins-xy) * 2);
   --main-width: calc(100vw - var(--total-main-navigation-width));
@@ -42,12 +43,12 @@ body {
   align-items: center;
 }
 
-.logo {
+/* .logo {
   filter: brightness(100);
   width: 150px;
   display: block;
   margin: 40px auto;
-}
+} */
 
 /* =============== Navigation ================ */
 .navigation {
@@ -71,7 +72,8 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 95vh;
+  /* height: 95vh; */
+  height: 100vh;
   margin: 0;
   /* margin-left: 20px; */
   padding: 0;
@@ -340,6 +342,129 @@ span.select2-selection.select2-selection--multiple {
 
 .hr-text-content {
   padding: 0 10px; /* spațierea textului față de linie */
+}
+
+/* New NAVBAR */
+nav {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  background: var(--blue);
+  width: var(--main-navigation-width);
+  overflow: hidden;
+  transition: 0.5s; /* width 0.2s linear */
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 50%; /* Poziționează meniul la jumătatea înălțimii */
+  transform: translateY(-50%); /* Ajustează poziția */
+  height: 100%; /* Setează înălțimea meniului la 100% */
+  display: flex; /* Activează flexbox pentru a alinia elementele */
+  flex-direction: column; /* Așează elementele în coloană */
+  justify-content: center; /* Aliniază elementele pe mijloc pe axa verticală */
+}
+
+nav li {
+  position: relative; /* Setează poziția relativă pe fiecare li */
+}
+
+nav li:first-child {
+  position: absolute; /* Poziționează logo-ul absolut în partea de sus */
+  top: 0;
+}
+
+nav li:last-child {
+  position: absolute; /* Poziționează butonul de logout absolut în partea de jos */
+  bottom: 0;
+}
+
+
+.logo {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  transition: all 0.5s ease;
+  /* margin: 10px 0 0 12.5px; */
+  filter: brightness(100);
+}
+
+a.logo {
+  margin: 0;
+  padding: 0;
+}
+
+.logo img {
+  width: 90px;
+  /* height: 45px; */
+  border-radius: 50%;
+}
+
+.logo span {
+  /* font-weight: bold; */
+  /* padding-left: 15px; */
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+nav a {
+  position: relative;
+  color: var(--grey);
+  font-size: 14px;
+  display: table;
+  width: var(--main-navigation-width-opened);
+  padding: 10px;
+  text-decoration: none;
+}
+
+nav .fas {
+  position: relative;
+  width: 70px;
+  height: 40px;
+  top: 14px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.nav-item {
+  position: relative;
+  top: 12px;
+  margin-left: 10px;
+}
+
+nav a:hover {
+  color: var(--white);
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 3px;
+  background-color: #8B88F8;
+  transition: width 1s ease; /* 0.3s */
+  border-radius: 10px;
+
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+nav a:hover::after {
+  width: calc(100% - 20px);
+}
+
+nav:hover {
+  width: var(--main-navigation-width-opened);
+  transition: all 0.5s ease; /* 0.5s */
 }
 
 /* ============= EOF Rewrited CSS ============= */

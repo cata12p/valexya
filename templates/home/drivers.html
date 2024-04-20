@@ -14,46 +14,79 @@
         <link rel="stylesheet" href="{{ css }}data_tables.css">
     {% endblock %}
 
-    <div class="row"> 
-        <div class="col-md-12 d-flex align-items-center">
+    <div class="row d-flex justify-content-center"> 
+        <div class="col-md-8">
             <div class="card card-stats shadow w-100">
                 <div class="card-body filterable">
                     <div class="d-flex align-items-center mb-5">
                         <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
-                            Soferi
+                            Șoferi
                         </h2>
-                        <button class="btn btn-primary bg-valexya border-valexya btn-filter ms-auto"><i class="fas fa-search"></i> Cautare</button>
+                        <div class="btn-group ms-auto" role="group">
+                            <button class="btn btn-primary bg-valexya border-valexya btn-filter"><i class="fas fa-search"></i> Căutare</button>
+                            <button class="btn btn-primary bg-valexya border-valexya" id="adauga_sofer"><i class="fas fa-plus"></i> Adaugă șofer</button>
+                        </div>
                     </div>
                     <table class="table table-responsive table-striped" id="tabel-soferi">
                         <thead>
                             <tr class="filters">
-                                <th class="ps-0"><input type="text" class="form-control" placeholder="Nume" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Nume" disabled></th>
                                 <th><input type="text" class="form-control" placeholder="Prenume" disabled></th>
                                 <th><input type="text" class="form-control" placeholder="Mașină / Mașini" disabled></th>
+                                <th class="fw-normal" id="actions_column">Acțiuni</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for driver in drivers %}
-                                <tr>
+                                <tr class="align-middle" data-driver-id="{{ driver.id }}" data-cars="{% for car in driver.car_set.all %}{{ car.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
                                     <td>{{ driver.first_name }}</td>
+                                    <input type="hidden" class="form-control" name="first_name" id="hidden-first_name-{{ driver.id }}" data-id="first_name-{{ driver.id }}" value="{{ driver.first_name }}">
                                     <td>{{ driver.last_name }}</td>
-                                    <td>
+                                    <input type="hidden" class="form-control" name="last_name" id="hidden-last_name-{{ driver.id }}" data-id="last_name-{{ driver.id }}" value="{{ driver.last_name }}">
+                                    <td width="35%">
                                         {% if driver.car_set.exists %}
                                             {% for car in driver.car_set.all %}
-                                                <div class="d-inline-flex align-items-center">
-                                                    <div class="plate-number">
-                                                        <img src="/static/assets/imgs/ro-europe.png" class="card-img-top" alt="ro-europe">
-                                                        <h3 class="text-center m-0">{{ car.plate_number }}</h3>
-                                                    </div>
-                                                </div>
-                                              <!-- {% if not forloop.last %} / {% endif %} -->
+                                                {{ car.plate_number }}
+                                                {% if not forloop.last %} / {% endif %}
                                             {% endfor %}
                                         {% else %}
-                                            <span class="ms-2 text-uppercase fw-medium text-danger">Nesetat</span>
+                                            <span class="text-uppercase fw-medium text-danger">Nesetat</span>
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        <div class="btn-group" id="edit-btn-group-{{ driver.id }}" role="group">
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="edit-driver-{{ driver.id }}"><i class="fas fa-edit"></i></button>
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="delete-driver-{{ driver.id }}" hx-delete="{% url 'drivers' %}?id={{ driver.id }}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click"><i class="fas fa-trash-alt"></i></button>
+                                        </div>
+                                        <div class="btn-group" id="save-btn-group-{{ driver.id }}" role="group" style="display: none;">
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="save-edit-{{ driver.id }}" hx-post="{% url 'drivers' %}?id={{ driver.id }}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click" hx-include="#hidden-first_name-{{ driver.id }}, #hidden-last_name-{{ driver.id }}, #hidden-cars-{{ driver.id }}">Salvează</button>
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="cancel-edit-{{ driver.id }}" hx-get="{% url 'drivers' %}" hx-target="body" hx-swap="outerHTML" hx-trigger="click">Închide</button>
+                                        </div>
+                                    </td>
+                                    <input type="hidden" class="form-control" name="cars" id="hidden-cars-{{ driver.id }}" data-id="cars-{{ driver.id }}" value="">
                                 </tr>
                             {% endfor %}
+                            <tr id="adauga_sofer_row" style="display: none;">
+                                <td>
+                                    <input type="text" class="form-control" placeholder="Nume" id="first_name" name="first_name">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" placeholder="Prenume" id="last_name" name="last_name">
+                                </td>
+                                <td>
+                                    <select class="select2 w-100" id="cars" name="cars" multiple="multiple" required>
+                                        {% for car in cars %}
+                                            <option value="{{ car.id }}">{{ car.plate_number }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary bg-valexya border-valexya" hx-post="{% url 'drivers' %}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click" hx-include="#first_name, #last_name, #cars"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-primary bg-valexya border-valexya cancel-button"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -61,6 +94,109 @@
         </div>
     </div>
     <script>
-        console.log('da', "{{ request.session.page }}");
+        $(document).ready(function() {
+            $("#adauga_sofer").click(function() {
+                var newRow = $('#adauga_sofer_row');
+                if (newRow.is(':visible')) {
+                    newRow.hide();
+                } else {
+                    newRow.show();
+                    $('select.select2').select2({
+                        placeholder: 'Selectează mașina/mașinile',
+                    });
+                    newRow.find('input[name="first_name"]').focus();
+                    $("html, body").animate({
+                        scrollTop: newRow.find('input[name="first_name"]').offset().top
+                    }, 500);
+                }
+            });
+            
+            $("#tabel-soferi").on("click", ".cancel-button", function() {
+                $(this).closest("tr").hide();
+            });
+            $(document).on("click", "[id^='edit-driver']", function() {
+                event.preventDefault();
+                var row = $(this).closest('tr');
+                console.log('row', row);
+                var firstName = row.find('#hidden-first_name-' + row.data("driver-id")).val();
+                var lastName = row.find('#hidden-last_name-' + row.data("driver-id")).val();
+                console.log('firstName', firstName);
+                console.log('lastName', lastName);
+
+                row.find('td:eq(0)').html('<input type="text" class="form-control" id="first_name-' + row.data("driver-id") + '" value="' + firstName + '">');
+                row.find('td:eq(1)').html('<input type="text" class="form-control" id="last_name-' + row.data("driver-id") + '" value="' + lastName + '">');
+
+                var selectHTML =
+                    '<select class="select2 d-inline" style="width: 100%;" id="cars-' + row.data("driver-id") + '" multiple="multiple">' +
+                        '{% for car in cars %}' +
+                            '<option value="{{ car.id }}">{{ car.plate_number }}</option>' +
+                        '{% endfor %}' +
+                    '</select>'
+                ;
+                row.find('td:eq(2)').html(selectHTML);
+
+                $('#cars-' + row.data("driver-id")).select2({
+                    placeholder: 'Selectează mașina/mașinile',
+                });
+
+                $('#cars-' + row.data("driver-id")).on("change", function() {
+                    var selectedValues = $(this).val();
+                    var separatedValues = [];
+                    if (selectedValues && selectedValues.length > 0) {
+                        selectedValues.forEach(function(value) {
+                            var valuesArray = value.split(',');
+                            valuesArray.forEach(function(val) {
+                                var trimmedValue = val.trim();
+                                if (!separatedValues.includes(trimmedValue)) {
+                                    separatedValues.push(trimmedValue);
+                                }
+                            });
+                        });
+                    }
+                    $('input[data-id="cars-' + row.data('driver-id') + '"]').val(separatedValues);
+                });
+
+                $('#first_name-' + row.data("driver-id")).on("change", function() {
+                    $('input[data-id="first_name-' + row.data('driver-id') + '"]').val($(this).val());
+                });
+
+                $('#last_name-' + row.data("driver-id")).on("change", function() {
+                    $('input[data-id="last_name-' + row.data('driver-id') + '"]').val($(this).val());
+                });
+
+                // setare valori in select2
+                var carIds;
+                var carsData = row.data("cars");
+                if (typeof carsData === 'string' && carsData.includes(",")) {
+                    carIds = carsData.split(",").map(function(carId) {
+                        return carId.trim();
+                    });
+                } else {
+                    carIds = [];
+                    if (typeof carsData === 'number') {
+                        carIds.push(carsData.toString());
+                    }
+                }
+                $('#cars-' + row.data("driver-id")).val(carIds).trigger('change');
+                // EOF setare valori in select2
+
+                {% comment %} $('#delete-driver-' + row.data('driver-id')).hide();
+                $('#edit-driver-' + row.data('driver-id')).hide();
+                $('#save-edit-' + row.data('driver-id')).show();
+                $('#cancel-edit-' + row.data('driver-id')).show(); {% endcomment %}
+
+                $('#edit-btn-group-' + row.data('driver-id')).hide();
+                $('#save-btn-group-' + row.data('driver-id')).show();
+            });
+        });
+        {% if message %}
+            Swal.fire({
+                icon: "success",
+                title: "<h5>{{ message|safe }}</h5>",
+                showConfirmButton: true,
+                confirmButtonText: "Inchide",
+                timer: 3000
+            });
+        {% endif %}
     </script>
 {% endblock content %}

@@ -10,7 +10,6 @@ import xml.etree.ElementTree as ET
 from decimal import Decimal
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-from django.views import View
 
 
 # def get_page_name(request):
@@ -119,7 +118,7 @@ class Router(APIView):
             
             elif page == 'drivers':
                 drivers_view = Drivers()
-                context = drivers_view.get_drivers_data(request)
+                context = drivers_view.get_drivers_data(request, request.session.get('entity'))
                 return render(request, "home/drivers.html", context)
 
 
@@ -245,64 +244,33 @@ class Raports(APIView):
 
 
         raports_data = dict(
-            incomings = dict(
-                collected = 0,
-                issued = 0,
-                total = 0,
-                formatted_total = 0
-            ),
-            outgoings = dict(
-                total = 0,
-                formatted_total = 0
-            ),
+            total_outgoings = 0,
             total_balance = 0,
-            total_profitability = 0
+            total_issued = 0,
+            total_collected = 0
         )
-
-        percents_data = dict(
-            collected = 0,
-            issued = 0,
-            outgoings = 0
-        )
-
         for incoming_data in incomings_data:
             value = incoming_data.value / get_bnr_exchange_rate('EUR') if incoming_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else incoming_data.value
-            raports_data['incomings']['total'] += value
-            
+            # if incoming_data.status == 'issued':
+            raports_data['total_issued'] += value
             if incoming_data.status == 'collected':
-                raports_data['incomings']['collected'] += value
-
-            elif incoming_data.status == 'issued':
-                raports_data['incomings']['issued'] += value
+                raports_data['total_collected'] += value
 
 
         for outgoing_data in outgoings_data:
-            raports_data['outgoings']['total'] += outgoing_data.value / get_bnr_exchange_rate('EUR') if outgoing_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else outgoing_data.value
+            raports_data['total_outgoings'] += outgoing_data.value / get_bnr_exchange_rate('EUR') if outgoing_data.currency == 'ron' and get_bnr_exchange_rate('EUR') else outgoing_data.value
 
-        # procente charts
-        total_sum = raports_data['incomings']['issued'] + raports_data['incomings']['collected'] + raports_data['outgoings']['total']
-
-        percentage_collected = (raports_data['incomings']['collected'] / total_sum) * 100
-        percentage_issued = (raports_data['incomings']['issued'] / total_sum) * 100
-        percentage_outgoings = (raports_data['outgoings']['total'] / total_sum) * 100
-
-
-        percents_data['collected'] = round(percentage_collected, 2)
-        percents_data['issued'] = round(percentage_issued, 2)
-        percents_data['outgoings'] = round(percentage_outgoings, 2)
-
-        balance = raports_data['incomings']['total'] - raports_data['outgoings']['total']
-        profitability = (balance / raports_data['incomings']['total']) * 100
-        raports_data['incomings']['formatted_total'] = "{:,.2f}".format(raports_data['incomings']['total'])
-        raports_data['outgoings']['formatted_total'] = "{:,.2f}".format(raports_data['outgoings']['total'])
+        balance = raports_data['total_collected'] - raports_data['total_outgoings']
+        profitability = (balance / raports_data['total_collected']) * 100
+        raports_data['total_collected'] = "{:,.2f}".format(raports_data['total_collected'])
+        raports_data['total_outgoings'] = "{:,.2f}".format(raports_data['total_outgoings'])
         raports_data['total_balance'] = "{:,.2f}".format(balance)
         raports_data['total_profitability'] = "{:,.2f}".format(profitability)
 
         context = dict (
             incomings = incomings_data,
             outgoings = outgoings_data,
-            raports = raports_data,
-            percents = percents_data
+            raports = raports_data
         )
         return context
 
@@ -479,76 +447,85 @@ class Invoices(APIView):
         return context
 
 
-class Drivers(View):
-    def get(self, request):
+class Drivers(APIView):
+    def get(self, request, id = None):
         if not request.user.is_authenticated:
             return check_authentication(request)
         
         else:
-            context = self.get_drivers_data(request)
+            context = self.get_drivers_data(request, id)
             return render(request, "home/drivers.html", context)
 
-    def post(self, request):
+    def post(self, request, id = None):
         if not request.user.is_authenticated:
             return check_authentication(request)
         
         else:
-            if request.GET.get('id'):
-                driver_data = dict (
-                    first_name = request.POST.get('first_name'),
-                    last_name = request.POST.get('last_name')
-                )
-                cars = request.POST.getlist('cars')
-                car_ids = [int(id) for sublist in [car.split(',') for car in cars] for id in sublist]
+            print(request.data)
+            driver_data = dict (
+                first_name = request.data.get('first_name'),
+                last_name = request.data.get('last_name')
+            )
+            print(driver_data)
+            cars = request.data.getlist('cars')
+            driver_obj = apps.get_model('home.Driver').objects.create(**driver_data)
 
-                driver_obj = apps.get_model('home.Driver').objects.filter(pk=request.GET.get('id'))
-                driver_obj.update(**driver_data)
+            for car in cars:
+                car_obj = apps.get_model('home.Car').objects.get(pk=car)
+                # print(car_obj)
+                car_obj.drivers.add(driver_obj)
+                car_obj.save()
 
-                driver_obj.first().car_set.clear()
-
-                for car in car_ids:
-                    car_obj = apps.get_model('home.Car').objects.get(pk=car)
-                    car_obj.drivers.add(driver_obj.first())
-                    car_obj.save()
-
-                context = self.get_drivers_data(request)
-                context['message'] = f"Șoferul { driver_obj.first().full_name } <br>a fost editat cu succes!"
-                
-                return render(request, "home/drivers.html", context)
+            context = self.get_drivers_data(request, id)
+            context['message'] = "Șoferul a fost adaugat cu succes!"
+            
+            return render(request, "home/drivers.html", context)
         
-            else :
-                driver_data = dict (
-                    first_name = request.POST.get('first_name'),
-                    last_name = request.POST.get('last_name')
-                )
-                cars = request.POST.getlist('cars')
-                driver_obj = apps.get_model('home.Driver').objects.create(**driver_data)
+    def put(self, request, id = None):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            driver_data = dict (
+                first_name = request.data.get('first_name'),
+                last_name = request.data.get('last_name')
+            )
+            # print(driver_data)
+            cars = request.data.getlist('cars')
+            # print(cars)
+            car_ids = [int(id) for sublist in [car.split(',') for car in cars] for id in sublist]
 
-                for car in cars:
-                    car_obj = apps.get_model('home.Car').objects.get(pk=car)
-                    car_obj.drivers.add(driver_obj)
-                    car_obj.save()
+            driver_obj = apps.get_model('home.Driver').objects.filter(pk=id)
+            driver_obj.update(**driver_data)
 
-                context = self.get_drivers_data(request)
-                context['message'] = "Șoferul a fost adaugat cu succes!"
-                
-                return render(request, "home/drivers.html", context)
+            driver_obj.first().car_set.clear()
+
+            for car in car_ids:
+                car_obj = apps.get_model('home.Car').objects.get(pk=car)
+                print(car_obj)
+                car_obj.drivers.add(driver_obj.first())
+                car_obj.save()
+
+            context = self.get_drivers_data(request, id)
+            context['message'] = f"Șoferul { driver_obj.first().full_name } <br>a fost editat cu succes!"
+            
+            return render(request, "home/drivers.html", context)
     
-    def delete(self, request):
+    def delete(self, request, id = None):
         if not request.user.is_authenticated:
             return check_authentication(request)
         
         else:
-            driver_obj = apps.get_model('home.Driver').objects.filter(pk=request.GET.get('id'))
+            driver_obj = apps.get_model('home.Driver').objects.filter(pk=id)
             driver_name = driver_obj.first().full_name
             driver_obj.delete()
 
-            context = self.get_drivers_data(request)
+            context = self.get_drivers_data(request, id)
             context['message'] = f"Șoferul { driver_name } <br>a fost sters cu succes!"
             
             return render(request, "home/drivers.html", context)
 
-    def get_drivers_data(self, request):
+    def get_drivers_data(self, request, id = None):
         request.session['page'] = 'drivers'
         drivers_data = apps.get_model('home.Driver').objects.all()
         cars_data = apps.get_model('home.Car').objects.all()

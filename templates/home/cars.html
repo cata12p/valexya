@@ -16,10 +16,21 @@
             <a href="#" class="btn btn-primary bg-valexya border-valexya me-2">Săptămânală</a>
             <a href="#" class="btn btn-primary bg-valexya border-valexya me-2">Lunară</a>
             <a href="#" class="btn btn-primary bg-valexya border-valexya">Anuală</a>
-            <form class="d-flex ms-auto" role="search">
+            <!-- <form class="d-flex ms-auto" role="search">
               <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
               <button class="btn btn-primary bg-valexya border-valexya" type="submit">Search</button>
-            </form>
+            </form> -->
+            <div class="btn-group ms-auto" role="group">
+              <!-- <div class="d-inline-flex align-items-center ms-auto"> -->
+                <div class="input-group w-50 flex-grow-1">
+                  <span class="input-group-text bg-valexya border-valexya text-white" id="basic-addon2"><i class="fas fa-search"></i></span>
+                  <input type="text" class="form-control border-valexya" id="searchInput" placeholder="BH11AAA" aria-describedby="basic-addon2" style="border-radius: 0;">
+                </div>
+                <button type="button" class="btn btn-primary bg-valexya border-valexya d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addCar">
+                  <i class="fas fa-plus me-1"></i>Adaugă mașină
+                </button>
+              <!-- </div> -->
+            </div>
         </div>
       </div>
       <div class="row">
@@ -88,20 +99,16 @@
           </div>
         {% endfor %}
       </div>
-      <!-- Button trigger modal -->
-      <button type="button" class="btn btn-primary mt-5" data-bs-toggle="modal" data-bs-target="#addCar">
-        Adauga masina
-      </button>
       <!-- Modal -->
       <div class="modal fade" id="addCar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addCarLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="addCarLabel">Adauga masina</h1>
+              <h1 class="modal-title fs-5" id="addCarLabel">Adaugă mașina</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form class="needs-validation" hx-post="{% url 'cars' %}" hx-target="body .container-fluid" novalidate>
+              <form class="needs-validation" id="addCarForm" hx-post="{% url 'cars' %}" hx-target="body .container-fluid" novalidate>
               <!-- <form class="needs-validation" action="{% url 'cars' %}" method="POST" novalidate> -->
                 {% csrf_token %}
                 <div class="row">
@@ -113,7 +120,7 @@
                   </div>
                   <div class="col-md-6 d-flex flex-column">
                     <label for="drivers">Adauga soferi</label>
-                    <select class="select2" name="drivers[]" multiple="multiple" onchange="validateSelect2(event)" required>
+                    <select class="select2" name="drivers" multiple="multiple" onchange="validateSelect2(event)" required>
                       {% for driver in drivers %}
                         <option value="{{ driver.id }}">{{ driver.full_name }}</option>
                       {% endfor %}
@@ -124,10 +131,10 @@
                 </div>
                 <div class="row d-flex justify-content-between mt-5">
                   <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Salveaza</button>
+                    <button type="submit" class="btn btn-primary bg-valexya border-valexya">Salvează</button>
                   </div>
                   <div class="col-auto">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Inchide</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Inchide</button>
                   </div>
                 </div>
               </form>
@@ -179,31 +186,35 @@
     //   })
     // })()
 
-    document.addEventListener('htmx:beforeRequest', function(event) {
-        const form = event.target;
+    var addCarForm = document.getElementById('addCarForm');
+    addCarForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      document.addEventListener('htmx:beforeRequest', function(event) {
+          const form = event.target;
 
-        const select2Inputs = form.querySelectorAll('span.select2-selection.select2-selection--multiple');
-    
-        select2Inputs.forEach(input => {
-            const selectedOptions = input.querySelectorAll('.select2-selection__choice');
+          const select2Inputs = form.querySelectorAll('span.select2-selection.select2-selection--multiple');
+      
+          select2Inputs.forEach(input => {
+              const selectedOptions = input.querySelectorAll('.select2-selection__choice');
 
-            if (selectedOptions.length === 0) {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-            } else {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-            }
-        });
+              if (selectedOptions.length === 0) {
+                  input.classList.remove('is-valid');
+                  input.classList.add('is-invalid');
+              } else {
+                  input.classList.remove('is-invalid');
+                  input.classList.add('is-valid');
+              }
+          });
 
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-        } else {
-          // htmx.ajax('GET', form.getAttribute('hx-post'));
-          $('#addCar').modal('hide');
-        }
-        form.classList.add('was-validated');
+          if (!form.checkValidity()) {
+              event.preventDefault();
+              event.stopPropagation();
+          } else {
+            // htmx.ajax('GET', form.getAttribute('hx-post'));
+            $('#addCar').modal('hide');
+          }
+          form.classList.add('was-validated');
+      });
     });
 
     function validatePlateNr(event) {
@@ -215,7 +226,6 @@
     function validateSelect2(event) {
       const select2Input = event.currentTarget.parentElement.querySelector('span.select2-selection.select2-selection--multiple');
       var selectedOptions = Array.from(event.currentTarget.selectedOptions).map(option => option.value);
-      // console.log(selectedOptions, selectedOptions.length);
 
       if (selectedOptions.length == 0) {
         select2Input.classList.remove('is-valid');
@@ -225,6 +235,45 @@
         select2Input.classList.add('is-valid');
       }
     }
+
+    // document.getElementById("searchInput").addEventListener("input", function() {
+    //     var searchTerm = this.value.toLowerCase();
+    //     var cards = document.querySelectorAll(".card");
+
+    //     cards.forEach(function(card) {
+    //         var cardContent = card.querySelector(".card-body").innerText.toLowerCase();
+    //         if (cardContent.includes(searchTerm)) {
+    //             card.style.display = ""; // Afișează cardul dacă conține textul căutat
+    //         } else {
+    //             card.style.display = "none"; // Ascunde cardul dacă nu conține textul căutat
+    //         }
+    //     });
+    // });
+    document.getElementById("searchInput").addEventListener("input", function() {
+    var searchTerm = this.value.toLowerCase();
+    var cards = document.querySelectorAll(".card");
+
+    cards.forEach(function(card) {
+        var cardContent = card.querySelector(".card-body").innerText.toLowerCase();
+        var column = card.closest('.col-lg-4'); // Găsim coloana care conține cardul
+
+        if (cardContent.includes(searchTerm)) {
+            card.style.display = "";
+            if (column) {
+                column.style.display = "";
+                column.style.width = "";
+                column.style.padding = "";
+            }
+        } else {
+            card.style.display = "none";
+            if (column) {
+                column.style.display = "none";
+                column.style.width = "0";
+                column.style.padding = "0";
+            }
+        }
+    });
+});
 
   </script>
 {% endblock content %}

@@ -52,7 +52,23 @@ $(document).ready(function() {
         $('#tabel-venituri').DataTable(table2Options);
     }
     if (session_page === 'drivers') {
-        $('#tabel-soferi').DataTable(commonOptions);
+        var tableOptions = Object.assign({}, commonOptions, {
+            "columnDefs": [{
+                "orderable": false,
+                "targets": $("#actions_column").index()
+            }]
+        });
+        // var table = $('#tabel-soferi').DataTable(tableOptions);
+        // var totalRows = table.rows().count() - 1;
+        // commonOptions.language.info = "<b>TOTAL</b> - " + totalRows + " înregistrări";
+        // table.destroy(); // Distrugeți tabelul existent
+        // table = $('#tabel-soferi').DataTable(tableOptions); // Redefiniți tabelul cu opțiunile actualizate
+        // table.draw();
+
+        var table = $('#tabel-soferi').DataTable(tableOptions);
+        var totalRows = table.rows().count() - 1;
+        var infoElement = $('#tabel-soferi_info');
+        infoElement.html("<b>TOTAL</b> - " + totalRows + " înregistrări");     
     }
   
     // Cautare in tabel

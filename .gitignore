@@ -1,0 +1,36 @@
+# Ignore Python bytecode files
+*.py[cod]
+
+# Ignore Python cache directories
+__pycache__/
+
+# Ignore virtual environment directories
+venv/
+.env/
+.venv/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore IDE/editor configuration
+.vscode/
+.idea/
+*.swp
+
+# Ignore test coverage files
+htmlcov/
+.tox/
+.coverage
+coverage.xml
+*.cover
+
+# Ignore Docker files
+*.log
+*.pid
+*.gz
+*.out
+
+# Ignore build files
+build/
+dist/
+*.egg-info/

@@ -70,6 +70,19 @@ $(document).ready(function() {
         var infoElement = $('#tabel-soferi_info');
         infoElement.html("<b>TOTAL</b> - " + totalRows + " înregistrări");     
     }
+    if (session_page === 'clients') {
+        var tableOptions = Object.assign({}, commonOptions, {
+            "columnDefs": [{
+                "orderable": false,
+                "targets": $("#actions_column").index()
+            }]
+        });
+
+        var table = $('#tabel-clienti').DataTable(tableOptions);
+        var totalRows = table.rows().count() - 1;
+        var infoElement = $('#tabel-clienti_info');
+        infoElement.html("<b>TOTAL</b> - " + totalRows + " înregistrări");     
+    }
   
     // Cautare in tabel
     $('.filterable .btn-filter').click(function() {
@@ -82,7 +95,8 @@ $(document).ready(function() {
         } else {
             $filters.val('').prop('disabled', true);
             $tbody.find('.no-result').remove();
-            $tbody.find('tr').show();
+            // $tbody.find('tr').show();
+            $tbody.find('tr').not('#adauga_sofer_row, #adauga_client_row').show();
         }
     });
   
@@ -94,7 +108,8 @@ $(document).ready(function() {
         $panel = $input.parents('.filterable'),
         column = $panel.find('.filters th').index($input.parents('th')),
         $table = $panel.find('.table'),
-        $rows = $table.find('tbody tr');
+        // $rows = $table.find('tbody tr');
+        $rows = $table.find('tbody tr').not('#adauga_sofer_row, #adauga_client_row');
         var $filteredRows = $rows.filter(function(){
             var value = $(this).find('td').eq(column).text().toLowerCase();
             return value.indexOf(inputContent) === -1;

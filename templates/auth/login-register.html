@@ -6,6 +6,9 @@
       <div class="login-img"></div>
     </div>
     <div class="col-sm-10 col-md-6 px-sm-0 align-self-center mx-auto py-5">
+      <div class="row justify-content-center g-0 mb-5">
+        <img alt="logo" src="{{ imgs }}logo.png" style="width: 20%;">
+      </div>
       <div class="row justify-content-center g-0">
         <div class="col-lg-9 col-xl-8 col-xxl-6">
           <div class="card" style="border-radius: 10px;">
@@ -27,12 +30,12 @@
                   <h3>Logare</h3>
                 </div>
                 <div class="col-auto text-600">
-                  <span class="mb-0 fw-semi-bold">Utilizator {% if register %}existent{% else %}nou{% endif %}?</span>
+                  <!-- <span class="mb-0 fw-semi-bold">Utilizator {% if register %}existent{% else %}nou{% endif %}?</span> -->
                   <span>
                     {% if register %}
                       <a href="" hx-get="{% url 'login' %}" hx-target="body .container-fluid" hx-trigger="click">Logheaza-te</a>
                     {% else %}
-                      <a href="" hx-get="{% url 'register' %}" hx-target="body .container-fluid" hx-trigger="click">Inregistreaza-te</a>
+                      <!-- <a href="" hx-get="{% url 'register' %}" hx-target="body .container-fluid" hx-trigger="click">Inregistreaza-te</a> -->
                     {% endif %}
                   </span>
                 </div>
@@ -62,9 +65,9 @@
                     <label for="confirmFloatingPassword">Confirma parola</label>
                   </div>
                 {% endif %}
-                <div class="col-auto text-end">
+                <!-- <div class="col-auto text-end">
                   <a href="../../../pages/authentication/split/forgot-password.html">Ai uitat parola?</a>
-                </div>
+                </div> -->
                 <div class="mb-3">
                   <button class="btn btn-lg d-block w-100 mt-3 text-white" type="submit" name="submit" style="background-color: var(--blue);">
                     {% if register %}Inregistreaza-te{% else %}Logheaza-te{% endif %}

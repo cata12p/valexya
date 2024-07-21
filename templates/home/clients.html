@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}
+    VALEXYA ICHIM S.R.L. - Clienți
+{% endblock %}
+
+{% block content %}
+    <div id="session-page" data-page="{{ request.session.page }}"></div>
+    {% block js %}
+        <script src="{{ js }}tables.js"></script>
+    {% endblock %}
+
+    {% block css %}
+        <link rel="stylesheet" href="{{ css }}data_tables.css">
+    {% endblock %}
+
+    <div class="row d-flex justify-content-center"> 
+        <div class="col-md-8">
+            <div class="card card-stats shadow w-100">
+                <div class="card-body filterable">
+                    <div class="d-flex align-items-center mb-5">
+                        <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
+                            Clienți
+                        </h2>
+                        <div class="btn-group ms-auto" role="group">
+                            <button class="btn btn-primary bg-valexya border-valexya btn-filter"><i class="fas fa-search"></i> Căutare</button>
+                            <button class="btn btn-primary bg-valexya border-valexya" id="adauga_client"><i class="fas fa-plus"></i> Adaugă client</button>
+                        </div>
+                    </div>
+                    <table class="table table-responsive table-striped" id="tabel-clienti">
+                        <thead>
+                            <tr class="filters">
+                                <th><input type="text" class="form-control" placeholder="Nume" disabled></th>
+                                <th class="fw-normal" id="actions_column">Acțiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients %}
+                                <tr class="align-middle" data-client-id="{{ client.id }}">
+                                    <td>{{ client.name }}</td>
+                                    <input type="hidden" class="form-control" name="name" id="hidden-name-{{ client.id }}" data-id="name-{{ client.id }}" value="{{ client.name }}">
+                                    <td>
+                                        <div class="btn-group" id="edit-btn-group-{{ client.id }}" role="group">
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="edit-client-{{ client.id }}"><i class="fas fa-edit"></i></button>
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="delete-client-{{ client.id }}" hx-delete="{% url 'clients' %}?id={{ client.id }}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click"><i class="fas fa-trash-alt"></i></button>
+                                        </div>
+                                        <div class="btn-group" id="save-btn-group-{{ client.id }}" role="group" style="display: none;">
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="save-edit-{{ client.id }}" hx-post="{% url 'clients' %}?id={{ client.id }}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click" hx-include="#hidden-name-{{ client.id }}">Salvează</button>
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="cancel-edit-{{ client.id }}" hx-get="{% url 'clients' %}" hx-target="body" hx-swap="outerHTML" hx-trigger="click">Închide</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            <tr id="adauga_client_row" style="display: none;">
+                                <td>
+                                    <input type="text" class="form-control" placeholder="Nume" id="name" name="name">
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-primary bg-valexya border-valexya" hx-post="{% url 'clients' %}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click" hx-include="#name"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-primary bg-valexya border-valexya cancel-button"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $("#adauga_client").click(function() {
+                var newRow = $('#adauga_client_row');
+                if (newRow.is(':visible')) {
+                    newRow.hide();
+                } else {
+                    newRow.show();
+                    $('select.select2').select2({
+                        placeholder: 'Selectează mașina/mașinile',
+                    });
+                    newRow.find('input[name="name"]').focus();
+                    $("html, body").animate({
+                        scrollTop: newRow.find('input[name="name"]').offset().top
+                    }, 500);
+                }
+            });
+            
+            $("#tabel-clienti").on("click", ".cancel-button", function() {
+                $(this).closest("tr").hide();
+            });
+            $(document).on("click", "[id^='edit-client']", function() {
+                event.preventDefault();
+                var row = $(this).closest('tr');
+                console.log('row', row);
+                var name = row.find('#hidden-name-' + row.data("client-id")).val();
+                console.log('name', name);
+
+                row.find('td:eq(0)').html('<input type="text" class="form-control" id="name-' + row.data("client-id") + '" value="' + name + '">');
+
+                $('#name-' + row.data("client-id")).on("change", function() {
+                    $('input[data-id="name-' + row.data('client-id') + '"]').val($(this).val());
+                });
+
+                {% comment %} $('#delete-client-' + row.data('client-id')).hide();
+                $('#edit-client-' + row.data('client-id')).hide();
+                $('#save-edit-' + row.data('client-id')).show();
+                $('#cancel-edit-' + row.data('client-id')).show(); {% endcomment %}
+
+                $('#edit-btn-group-' + row.data('client-id')).hide();
+                $('#save-btn-group-' + row.data('client-id')).show();
+            });
+        });
+        {% if message %}
+            Swal.fire({
+                icon: "success",
+                title: "<h5>{{ message|safe }}</h5>",
+                showConfirmButton: true,
+                confirmButtonText: "Inchide",
+                timer: 3000
+            });
+        {% endif %}
+    </script>
+{% endblock content %}

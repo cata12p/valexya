@@ -10,7 +10,198 @@
             <a href="#" class="btn btn-outline-primary border-valexya color-valexya">Anuală</a>
         </div>
     </div>
-    <div class="row">
-        
+    <div class="row mt-5">
+        <div class="col-md-12 d-flex">
+            <div class="card card-stats shadow flex-fill">
+                <div class="card-body filterable">
+                    <div class="d-flex align-items-center mb-5">
+                        <h2 class="m-0" style="font-size: 24px; color: var(--blue);">
+                            Facturi <span class="text-danger mr-2"><i class="fas fa-arrow-down" style="font-size: 24px;"></i></span> <span class="text-success mr-2"><i class="fas fa-arrow-up" style="font-size: 24px;"></i></span>
+                        </h2>
+                        <div class="btn-group ms-auto" role="group">
+                            <button class="btn btn-primary bg-valexya border-valexya btn-filter"><i class="fas fa-search"></i> Căutare</button>
+                            <button class="btn btn-primary bg-valexya border-valexya" id="adauga_factura" data-bs-toggle="modal" data-bs-target="#addInvoice"><i class="fas fa-plus"></i> Adaugă factură</button>
+                        </div>
+                    </div>
+                    <table class="table table-responsive table-striped" id="tabel-facturi">
+                        <thead>
+                            <tr class="filters">
+                                <th class="ps-0"><input type="text" class="form-control" placeholder="Client" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Serie & Nr" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Data emiterii" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Tip" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Status" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Valoare" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Descriere" disabled></th>
+                                <th><input type="text" class="form-control" placeholder="Masini(suma) / factura" disabled></th>
+                                <th class="fw-normal" id="actions_column">Acțiuni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in invoices %}
+                                <tr>
+                                    <td>{{ invoice.client }}</td>
+                                    <td>{{ invoice }}</td>
+                                    <td>{{ invoice.emit_date|date:"d.m.Y" }}</td>
+                                    <td>{{ invoice.get_category_display }}</td>
+                                    <td>{{ invoice.get_status_display }}</td>
+                                    <td>{{ invoice.value }} {{ invoice.currency|upper }}</td>
+                                    <td>{{ invoice.description }}</td>
+                                    <td>
+                                        {% for car in invoice.invoicecar_set.all %}
+                                            {% if not forloop.first %} / {% endif %}
+                                            {{ car.car.plate_number }} ({{ car.value }})
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" id="edit-btn-group-{{ invoice.id }}" role="group">
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="edit-invoice-{{ invoice.id }}"><i class="fas fa-edit"></i></button>
+                                            <button type="button" class="btn btn-primary bg-valexya border-valexya" id="delete-invoice-{{ invoice.id }}" hx-delete="{% url 'invoices' %}?id={{ invoice.id }}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click"><i class="fas fa-trash-alt"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="addInvoice" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="addInvoiceLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addInvoiceLabel">Adaugă factura</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form class="needs-validation" id="addCarForm" hx-post="{% url 'cars' %}" hx-target="body .container-fluid" novalidate>
+                        <!-- <form class="needs-validation" action="{% url 'cars' %}" method="POST" novalidate> -->
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-lg-12 col-md-6 d-flex">
+                                <div class="card-body">
+                                    <form hx-post="{% url 'edit-car' id=request.session.entity %}" hx-target="body .container-fluid">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="client" class="form-label">Client</label>
+                                                <select class="form-select form-select-md" name="client" required>
+                                                    <option value="" selected>Selecteaza un client</option>
+                                                    {% for client in clients %}
+                                                        <option value="{{ client.id }}">{{ client.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label for="series" class="form-label">Serie</label>
+                                                <input type="text" class="form-control" name="series" required>
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label for="number" class="form-label">Număr</label>
+                                                <input type="number" class="form-control" name="number" required>
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label for="emit_date" class="form-label">Data emiterii</label>
+                                                <input type="date" class="form-control" name="emit_date" value="{{ emit_date|date:'Y-m-d' }}">
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label for="due_date" class="form-label">Data scadenței</label>
+                                                <input type="date" class="form-control" name="due_date" value="{{ due_date|date:'Y-m-d' }}">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="category" class="form-label">Tip factura</label>
+                                                <select class="form-select form-select-md" id="category" name="category" required>
+                                                    <option value="incoming" selected>Venit</option>
+                                                    <option value="outgoing">Cheltuială</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3" id="col_expense_category" style="display: none;">
+                                                <label for="expense_category" class="form-label">Tip cheltuiala</label>
+                                                <select class="form-select form-select-md" id="expense_category" name="expense_category">
+                                                    <option value="" selected>Selecteaza chetuiala</option>
+                                                    {% for expense in expense_categories %}
+                                                        <option value="{{ expense.id }}">{{ expense.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="status" class="form-label">Status</label>
+                                                <select class="form-select form-select-md" name="status">
+                                                    <option value="issued" selected>Emisă</option>
+                                                    <option value="collected">Încasată</option>
+                                                    <option value="paid">Plătită</option>
+                                                    <option value="exceed">Depașită</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-2 mb-3">
+                                                <label for="value" class="form-label">Valoare</label>
+                                                <input type="number" class="form-control" name="value" required>
+                                            </div>
+                                            <div class="col-md-2 mb-3">
+                                                <label for="currency" class="form-label">Moneda</label>
+                                                <select class="form-select form-select-md" name="currency" required>
+                                                    <option value="ron" selected>RON</option>
+                                                    <option value="eur">EURO</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-7">
+                                                <label for="description" class="form-label">Descriere</label>
+                                                <textarea class="form-control" style="height: 250px;" name="description" placeholder="Introdu aici descrierea"></textarea>
+                                            </div>
+                                        </div>
+                                        <h1 class="modal-title fs-5 mt-5" id="addInvoiceCarLabel">Adaugă mașin(ă/i) pe factură</h1>
+                                        <div class="row mt-4">
+                                            <div class="col-md-4 mb-3">
+                                                <label for="car" class="form-label">Mașină</label>
+                                                <select class="form-select form-select-md" id="car" name="car" required>
+                                                    <option value="" selected>Selectează o mașină</option>
+                                                    {% for car in cars %}
+                                                        <option value="{{ car.id }}">{{ car.plate_number }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="expense_category" class="form-label">Categorie Cheltuială</label>
+                                                <select class="form-select form-select-md" id="expense_category" name="expense_category">
+                                                    <option value="" selected>Selectează o categorie</option>
+                                                    {% for expense in expense_categories %}
+                                                        <option value="{{ expense.id }}">{{ expense.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label for="car_value" class="form-label">Valoare</label>
+                                                <input type="number" class="form-control" id="car_value" name="car_value" required>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" id="add-more-cars" class="btn btn-success mt-3 w-auto">Adaugă încă o mașină</button>
+                                            <button type="submit" class="btn btn-primary bg-valexya border-valexya mt-3 ms-auto">Salvează</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    $('#category').change(function() {
+        if ($(this).val() === 'outgoing') {
+            $('#col_expense_category').show();
+            $('#expense_category').prop('required', true);
+        } else {
+            $('#col_expense_category').hide();
+            $('#expense_category').prop('required', false);
+        }
+    });
+  </script>
 {% endblock content %}

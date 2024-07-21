@@ -142,13 +142,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#">
-                            <i class="fas fa-receipt"></i>
-                            <span class="nav-item">Cheltuieli</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#">
+                        <a href="" hx-get="{% url 'clients' %}" hx-target="body .container-fluid" hx-swap="outerHTML" hx-trigger="click">
                             <i class="fas fa-people-arrows"></i>
                             <span class="nav-item">Clienți</span>
                         </a>

@@ -122,6 +122,11 @@ class Router(APIView):
                 context = drivers_view.get_drivers_data(request)
                 return render(request, "home/drivers.html", context)
 
+            elif page == 'clients':
+                clients_view = Clients()
+                context = clients_view.get_clients_data(request)
+                return render(request, "home/clients.html", context)
+
 
 class Login(APIView):
     def get(self, request):
@@ -282,17 +287,17 @@ class Raports(APIView):
         # procente charts
         total_sum = raports_data['incomings']['issued'] + raports_data['incomings']['collected'] + raports_data['outgoings']['total']
 
-        percentage_collected = (raports_data['incomings']['collected'] / total_sum) * 100
-        percentage_issued = (raports_data['incomings']['issued'] / total_sum) * 100
-        percentage_outgoings = (raports_data['outgoings']['total'] / total_sum) * 100
+        if total_sum != 0:
+            percentage_collected = (raports_data['incomings']['collected'] / total_sum) * 100
+            percentage_issued = (raports_data['incomings']['issued'] / total_sum) * 100
+            percentage_outgoings = (raports_data['outgoings']['total'] / total_sum) * 100
 
-
-        percents_data['collected'] = round(percentage_collected, 2)
-        percents_data['issued'] = round(percentage_issued, 2)
-        percents_data['outgoings'] = round(percentage_outgoings, 2)
+            percents_data['collected'] = round(percentage_collected, 2)
+            percents_data['issued'] = round(percentage_issued, 2)
+            percents_data['outgoings'] = round(percentage_outgoings, 2)
 
         balance = raports_data['incomings']['total'] - raports_data['outgoings']['total']
-        profitability = (balance / raports_data['incomings']['total']) * 100
+        profitability = (balance / raports_data['incomings']['total']) * 100 if raports_data['incomings']['total'] != 0 else 0
         raports_data['incomings']['formatted_total'] = "{:,.2f}".format(raports_data['incomings']['total'])
         raports_data['outgoings']['formatted_total'] = "{:,.2f}".format(raports_data['outgoings']['total'])
         raports_data['total_balance'] = "{:,.2f}".format(balance)
@@ -472,9 +477,15 @@ class Invoices(APIView):
 
     def get_invoices_data(self, request):
         request.session['page'] = 'invoices'
-        incomings_data = apps.get_model('home.Invoice').objects.filter(category='incoming')
+        invoices_data = apps.get_model('home.Invoice').objects.all()
+        clients_data = apps.get_model('home.Client').objects.all()
+        cars_data = apps.get_model('home.Car').objects.all()
+        expense_categories_data = apps.get_model('home.ExpenseCategory').objects.all()
         context = dict (
-            invoices = incomings_data
+            invoices = invoices_data,
+            clients = clients_data,
+            cars = cars_data,
+            expense_categories = expense_categories_data
         )
         return context
 
@@ -516,7 +527,7 @@ class Drivers(View):
                 
                 return render(request, "home/drivers.html", context)
         
-            else :
+            else:
                 driver_data = dict (
                     first_name = request.POST.get('first_name'),
                     last_name = request.POST.get('last_name')
@@ -555,5 +566,66 @@ class Drivers(View):
         context = dict (
             drivers = drivers_data,
             cars = cars_data
+        )
+        return context
+
+
+class Clients(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            context = self.get_clients_data(request)
+            return render(request, "home/clients.html", context)
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            if request.GET.get('id'):
+                client_data = dict (
+                    name = request.POST.get('name')
+                )
+
+                client_obj = apps.get_model('home.Client').objects.filter(pk=request.GET.get('id'))
+                client_obj.update(**client_data)
+
+                context = self.get_clients_data(request)
+                context['message'] = f"Clientul { client_obj.first().name } <br>a fost editat cu succes!"
+                
+                return render(request, "home/clients.html", context)
+        
+            else:
+                client_data = dict (
+                    name = request.POST.get('name')
+                )
+                client_obj = apps.get_model('home.Client').objects.create(**client_data)
+
+                context = self.get_clients_data(request)
+                context['message'] = "Clientul a fost adaugat cu succes!"
+                
+                return render(request, "home/clients.html", context)
+    
+    def delete(self, request):
+        if not request.user.is_authenticated:
+            return check_authentication(request)
+        
+        else:
+            client_obj = apps.get_model('home.Client').objects.filter(pk=request.GET.get('id'))
+            driver_name = client_obj.first().name
+            client_obj.delete()
+
+            context = self.get_clients_data(request)
+            context['message'] = f"Clientul { driver_name } <br>a fost sters cu succes!"
+            
+            return render(request, "home/clients.html", context)
+
+    def get_clients_data(self, request):
+        request.session['page'] = 'clients'
+        clients_data = apps.get_model('home.Client').objects.all()
+        context = dict (
+            clients = clients_data
         )
         return context

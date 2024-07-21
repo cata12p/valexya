@@ -1,17 +1,17 @@
-version: '3'
+version: '3.8'
 
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
+    command: uwsgi --ini /app/uwsgi.ini
     volumes:
       - .:/app
     ports:
-      - "8000:8000" # Use PORT variable from .env if provided, default to 8000
+      - "${PORT:-8000}:8000"
     env_file:
-      - .env  # Specify .env file here
+      - .env
     depends_on:
       - db
 

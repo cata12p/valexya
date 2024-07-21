@@ -1,6 +1,6 @@
 Django==3.2.8
 djangorestframework
-psycopg2
+psycopg2-binary
 django-htmx
 requests
 python-dateutil
